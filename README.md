@@ -11,4 +11,5 @@
 ## TODOs
 * [x] Setup Beagleboards
 * [x] Expose SSH
-
+* [ ] Setup deploy-script
+* [ ] Setup CI/CD
