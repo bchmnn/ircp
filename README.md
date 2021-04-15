@@ -9,6 +9,6 @@
 * https://beagleboard.org/linux/
 
 ## TODOs
-* [ ] Setup Beagleboards
-* [ ] Expose SSH
+* [x] Setup Beagleboards
+* [x] Expose SSH
 
