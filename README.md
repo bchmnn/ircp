@@ -8,3 +8,7 @@
 * https://beagleboard.org/getting-started/
 * https://beagleboard.org/linux/
 
+## Todos
+
+* [ ] Setup Beagleboards
+* [ ] Expose SSH
