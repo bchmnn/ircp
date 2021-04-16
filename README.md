@@ -7,6 +7,7 @@
 ## Links
 * https://beagleboard.org/getting-started/
 * https://beagleboard.org/linux/
+* https://kn-pr.tkn.tu-berlin.de/wiki/doku.php
 
 ## TODOs
 * [x] Setup Beagleboards
