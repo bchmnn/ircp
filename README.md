@@ -5,12 +5,10 @@
 * CC1200
 
 ## Links
-* [ Begleboard getting-started](https://beagleboard.org/getting-started/)
-* [Begleboard Linux] (https://beagleboard.org/linux/)
-* [TKN Wiki ](https://kn-pr.tkn.tu-berlin.de/wiki/doku.php)
-*  [User’s Guide of the CC1200](http://www.ti.com/lit/ug/swru346b/swru346b.pdf)
-
-
+* [Begleboard getting-started](https://beagleboard.org/getting-started/)
+* [Begleboard Linux](https://beagleboard.org/linux/)
+* [TKN Wiki](https://kn-pr.tkn.tu-berlin.de/wiki/doku.php)
+* [User’s Guide of the CC1200](http://www.ti.com/lit/ug/swru346b/swru346b.pdf)
 
 ## TODOs
 * [x] Setup Beagleboards
@@ -18,7 +16,16 @@
 * [ ] Setup deploy-script
 * [ ] Setup CI/CD
 
-
+## Services
+* Copy the `./docs/*.service` files to `/etc/systemd/system/.`
+* Extract `./archives/*` to `/srv/.`
+	* `/srv/cc1200d/cc1200d` needs to be executable
+	* `/usr/bin/node /srv/CC1200-Control-Center/4C.js` needs to be executable
+	* in `/srv/CC1200-Control-Center/4C.js` change BeagleBone to `127.0.0.1`
+	* in `/srv/CC1200-Control-Center/4C.js` at the end change the port of the webapp accordingly
+* `sudo systemctl daemon-reload`
+* `sudo systemctl enable <name>.service`
+* `sudo systemctl start <name>.service` or `sudo reboot`
 
 ## Basic inforamtion
 

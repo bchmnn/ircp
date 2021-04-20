@@ -1,0 +1,13 @@
+[Unit]
+Description=CC1200 Daemon
+After=multi-user.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/srv/cc1200d/cc1200d
+
+[Install]
+WantedBy=multi-user.target

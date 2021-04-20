@@ -1,0 +1,11 @@
+[Unit]
+Description=CC1200 Control Center
+After=multi-user.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/node /srv/CC1200-Control-Center/4C.js
+
+[Install]
+WantedBy=multi-user.target
