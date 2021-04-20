@@ -6,6 +6,7 @@ StartLimitIntervalSec=0
 [Service]
 Type=simple
 ExecStart=/usr/bin/node /srv/CC1200-Control-Center/4C.js
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
