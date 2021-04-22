@@ -66,8 +66,9 @@ int main (void) {
 	cc1200_cmd(SNOP);
   	printf("INFO: Status:%s\n", get_status_cc1200_str());
 	while (1) {
-		cc1200_reg_read(RSSI1, &val);
-		printf("RSSI1: %d\n", val << 3);
+		val = cc1200_reg_read(RSSI1, 0) << 3;
+		val += cc1200_reg_read(RSSI0, 0) & 0b111000 >> 3;
+		printf("RSSI1: %d\n", val);
 		sleep(1);
 	}
 
