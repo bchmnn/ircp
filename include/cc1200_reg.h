@@ -3,6 +3,9 @@
 /*                                                             */
 /*  Generated at 3/20/2021  11:19.27                             */
 /***************************************************************/
+
+#ifndef CC1200_REG_H
+#define CC1200_REG_H
  
 #define  IOCFG3             0x00 
 #define  IOCFG2             0x01 
@@ -181,3 +184,5 @@
 #define  FIFO_NUM_TXBYTES   0x2FD8
 #define  FIFO_NUM_RXBYTES   0x2FD9
 #define  RXFIFO_PRE_BUF     0x2FDA
+
+#endif //CC1200_REG_H

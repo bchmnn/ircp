@@ -27,27 +27,44 @@
 * `sudo systemctl enable <name>.service`
 * `sudo systemctl start <name>.service` or `sudo reboot`
 
+## Building
+* Use the bash-script `fast` for that
+```
+$ ./fast help
+Usage: ./fast <command>
+Commands:
+    cmake   runs cmake in dir target
+    build   runs cmake --build target
+    exec    runs the target binary
+    clean   rm -rf ./target
+    help    show this screen
+```
+* The resulting executable will be ./target/main
+
 ## Basic inforamtion
+* CC1200: basic registers: 0x00
+* CC1200: extended registers: 0x2fxx (0x2f00 offset) 
 
- basic registers  0x00
- extended registers. 0x2F (0x2F00 offset) 
+```c
+// returns true on success
+int spi_init(void);
 
+// has to be called if `spi_init` was called before
+void spi_shutdown(void);
 
-int spi_init(void)  		wenn succes the func return true
+// returns written value
+int cc1200_reg_write(int adr, int val);
 
-void spi_shutdown(void)        corresponding to spi_init
+// returns read value
+int cc1200_reg_read(int adr, int *val);
 
-int cc1200_reg_write(int adr, int val) return the written value.
+int cc1200_cmd(int cmd);
 
-int cc1200_reg_read(int adr, int *val) return the register value
+// cc1200_cmd(SNOP) has to be called before
+// returns last available status
+int get_status_cc1200(void);
 
-
-int cc1200_cmd(int cmd)
-
-int get_status_cc1200(void) returns the last available status
-
-char *get_status_cc1200_str(void) returns the status information as a string.
-
-
-
+// return last available status as string
+char *get_status_cc1200_str(void);
+```
 

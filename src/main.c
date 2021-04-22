@@ -1,57 +1,76 @@
+/****************************************************************************/
+/*                                                                          */
+/* Structure of programs controlling CC1200                                 */
+/*                                                                          */
+/****************************************************************************/
+ 
 
 #include <stdio.h>
-#include <SPIv1.h> // necessary, otherwise CC1200 prototype are not available
-#include "smartrf_CC1200.h" // import register settings
-#include "smartrf_adr_CC1200.h" // import register addresses
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <signal.h>
+
+#include <SPIv1.h>
+#include "cc1200_reg.h"
+#include "cc1200_state_read_rssi.h"
+
+void sigint_handler(int status) {
+	printf("\nWARN: Received SIGINT: %d\n", status);
+        printf("INFO: Shutting down SPI...\n");
+	spi_shutdown();
+	exit(1);
+}
  
 int main (void) {
+
+  	// first initialize
+        printf("INFO: Initializing SPI\n");
+  	if (spi_init()) {
+    		printf("ERR: Initialization failed\n");
+    		return -1;
+	}
+
+	struct sigaction act;
+	act.sa_handler = sigint_handler;
+	sigaction(SIGINT, &act, NULL);
+
+	
+	// reset CC1200
+	// cc1200 is now in idle mode, registers have their default values
+        cc1200_cmd(SRES);
+
+  	// reprogram the registers
+	for (int i = 0; i < MAX_REG; i++) {
+  		cc1200_reg_write(RegSettings[i].adr,RegSettings[i].val);
+  	}
+	
+  	for (int i=0; i<MAX_EXT_REG; i++) {
+		cc1200_reg_write(ExtRegSettings[i].adr, ExtRegSettings[i].val);
+	}
+
+ 	// get status information
+        // SNOP command has to be executed prior to status retrieval
+  	cc1200_cmd(SNOP);
+  	printf("INFO: Status: %s\n", get_status_cc1200_str());
+
+        printf("INFO: Putting into receive mode...\n");
+        // receive mode
+	cc1200_cmd(SRX);
+        sleep(1);
+	cc1200_cmd(SNOP);
+  	printf("INFO: Status: %s\n", get_status_cc1200_str());
+	signed char rssi = 0;
+	while (true) {
+		rssi = (signed char) cc1200_reg_read(RSSI1, 0);
+		printf("INFO: CC1200: RSSI1: %d\n", (int) rssi);
+		sleep(1);
+	}
+
+	// shutdown SPI
+  	spi_shutdown();
  
- int adr;
- int val;
- 
-  // first initialize
-  if(spi_init()){
-    printf("ERROR: Initialization failed\n");
-    return -1;
- 
-  // do some register reading or writing, 
-  // performance commands and get status information
- 
-  // reset CC1200
-  cc1200_cmd(SRES);
- 
-  // CC1200 is now in idle mode, registers have their default values
-  // Reprogram the registers
-  cc1200_reg_write(IOCFG2_ADR, SMARTRF_SETTING_IOCFG2);
-  cc1200_reg_write(IOCFG0_ADR, SMARTRF_SETTING_IOCFG0);
- 
-  // ... reprogram the remaining registers 
- 
-  // Programm the RF frequency
-  cc1200_reg_write(FREQ2_ADR, SMARTRF_SETTING_FREQ2);
-  cc1200_reg_write(FREQ1_ADR, SMARTRF_SETTING_FREQ1);
-  cc1200_reg_write(FREQ0_ADR, SMARTRF_SETTING_FREQ0);
- 
-  // ... reprogram the remaining registers
- 
-  cc1200_reg_write(SERIAL_STATUS_ADR, SMARTRF_SETTING_SERIAL_STATUS);  
- 
- 
-  // get status information
-  cc1200_cmd(SNOP);
-  printf("INFO: Status:%s\n", get_status_cc1200_str());
- 
-  adr = 0x01;
-  // register read
-  cc1200_reg_read(adr, &val);
-  printf("INFO:read Adr:0x%x Val:0x%x\n", adr, val);
- 
-  // read extended register
-  adr = EXT_ADR | 0x0A;
-  cc1200_reg_read(adr, &val);
- 
-  // shutdown SPI
-  spi_shutdown();
- 
-  return 0;
+ 	return 0;
+
 }
+

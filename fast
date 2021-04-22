@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+target_dir="target"
+target_name="main"
+
+usage() {
+        echo "Usage: $0 <command>"
+        echo "Commands:"
+        echo "    cmake   runs cmake in dir target"
+        echo "    build   runs cmake --build target"
+        echo "    exec    runs the target binary"
+        echo "    clean   rm -rf ./target"
+        echo "    help    show this screen"
+        exit 2
+}
+
+case $1 in
+cmake)
+        if [[ ! -f "CMakeLists.txt" ]]; then
+                echo "Err: CMakeLists.txt does not exist in current directory"
+                exit 2
+        fi
+        mkdir -p $target_dir
+        cd $target_dir
+        cmake ../.
+        ;;
+build)
+        cmake --build $target_dir
+        ;;
+exec)
+        ./$target_dir/$target_name
+        ;;
+clean)
+        rm -rf $target_dir
+        ;;
+help)
+        usage
+        ;;
+*)
+        echo "Err: Unknown command: $1"
+        usage
+        ;;
+esac
+
