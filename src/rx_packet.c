@@ -55,11 +55,16 @@ int main (void) {
         sleep(1);
 	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
-	signed char rssi = 0;
+	char data = 0;
 	while (true) {
-		rssi = (signed char) cc1200_reg_read(RSSI1, 0);
-		printf("INFO: CC1200: RSSI1: %d\n", (int) rssi);
-		sleep(1);
+		int variable =cc1200_reg_read(NUM_RXBYTES,0);
+		printf("INFO: CC1200: NUM_RXBYTES: %d\n", variable);
+		if(variable){
+			data = (char) cc1200_reg_read(RXLAST, 0);
+			printf("INFO: CC1200: RXFIRST: %d\n", (int) data);
+			printf("INFO: CC1200: RXFIRST: %c\n", (char) data);
+			sleep(1);
+		}
 	}
 
 	// shutdown SPI

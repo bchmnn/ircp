@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 target_dir="target"
-target_name="rx_rssi"
+target_name="rx_packet"
 
 usage() {
         echo "Usage: $0 <command>"
