@@ -57,7 +57,7 @@ int main (void) {
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
 	char data = 0;
 	while (true) {
-		int variable =cc1200_reg_read(NUM_RXBYTES,0);
+		int variable =cc1200_reg_read(PXT_LEN,0);
 		printf("INFO: CC1200: NUM_RXBYTES: %d\n", variable);
 		if(variable){
 			data = (char) cc1200_reg_read(RXLAST, 0);
