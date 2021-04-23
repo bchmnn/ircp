@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 
+current_dir=$(pwd)
+exec_dir="/home/debian/ppl"
 target_dir="target"
 target_name="rx_packet"
+
 
 usage() {
         echo "Usage: $0 <command>"
@@ -13,6 +16,8 @@ usage() {
         echo "    help    show this screen"
         exit 2
 }
+
+cd $exec_dir
 
 case $1 in
 cmake)
