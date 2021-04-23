@@ -12,4 +12,5 @@ include_directories(include)
 file(GLOB SOURCES "src/*.c")
 
 add_executable(rx_rssi "src/rx_rssi.c")
+add_executable(rx_packet "src/rx_packet.c")
 
