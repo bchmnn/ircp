@@ -10,5 +10,6 @@ set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS}"
 
 include_directories(include)
 file(GLOB SOURCES "src/*.c")
-add_executable(main ${SOURCES})
+
+add_executable(rx_rssi "src/rx_rssi.c")
 

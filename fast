@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 target_dir="target"
-target_name="main"
+target_name="rx_rssi"
 
 usage() {
         echo "Usage: $0 <command>"
