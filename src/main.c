@@ -13,7 +13,7 @@
 
 #include <SPIv1.h>
 #include "cc1200_reg.h"
-#include "cc1200_state_read_rssi.h"
+#include "cc1200_mode_rx_rssi.h"
 
 void sigint_handler(int status) {
 	printf("\nWARN: Received SIGINT: %d\n", status);
@@ -41,13 +41,8 @@ int main (void) {
         cc1200_cmd(SRES);
 
   	// reprogram the registers
-	for (int i = 0; i < MAX_REG; i++) {
-  		cc1200_reg_write(RegSettings[i].adr,RegSettings[i].val);
-  	}
-	
-  	for (int i=0; i<MAX_EXT_REG; i++) {
-		cc1200_reg_write(ExtRegSettings[i].adr, ExtRegSettings[i].val);
-	}
+        cc1200_regs_write(RegSettings, MAX_REG);
+        cc1200_regs_write(ExtRegSettings, MAX_EXT_REG);
 
  	// get status information
         // SNOP command has to be executed prior to status retrieval

@@ -185,4 +185,15 @@
 #define  FIFO_NUM_RXBYTES   0x2FD9
 #define  RXFIFO_PRE_BUF     0x2FDA
 
+typedef struct {
+        int adr;
+        int val;
+} REG_TYPE;
+
+static inline void cc1200_regs_write(REG_TYPE* regs, int len) {
+        for (int i = 0; i < len; i++) {
+  		cc1200_reg_write(regs[i].adr, regs[i].val);
+  	}
+}
+
 #endif //CC1200_REG_H

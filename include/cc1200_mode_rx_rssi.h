@@ -4,15 +4,10 @@
 /*  Generated at x/x/2021  12:26.17                             */
 /***************************************************************/
 
-#ifndef CC1200_STATE_READ_RSSI_H
-#define CC1200_STATE_READ_RSSI_H
+#ifndef CC1200_MODE_RX_RSSI_H
+#define CC1200_MODE_RX_RSSI_H
 
 #include "cc1200_reg.h"
-
-typedef struct {
-        int adr;  /**< Register Adresse  */
-        int val;  /**< Wert des Registers */
-} REG_TYPE;
 
 #define MAX_REG  47
 #define MAX_EXT_REG  130
@@ -203,4 +198,4 @@ REG_TYPE ExtRegSettings[MAX_EXT_REG] =
     {RXFIFO_PRE_BUF  , 0x00 }  // RX FIFO Status
 };
 
-#endif //CC1200_STATE_READ_RSSI_H
+#endif //CC1200_MODE_RX_RSSI_H

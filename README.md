@@ -4,6 +4,11 @@
 * Beagleboard Black
 * CC1200
 
+RSSI: SNR - Signal to noice ratio
+      SIR - Signal to interference ratio
+      Symbolrate - Symbols per second
+      Bitrate - Bits per second
+
 ## Links
 * [Begleboard getting-started](https://beagleboard.org/getting-started/)
 * [Begleboard Linux](https://beagleboard.org/linux/)
