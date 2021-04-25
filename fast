@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 current_dir=$(pwd)
-exec_dir="/home/debian/ppl"
+exec_dir="/home/debian/git/ppl"
 target_dir="target"
 target_name="rx_packet"
+src_dir="src"
 
 
 usage() {
@@ -41,6 +42,9 @@ clean)
 help)
         usage
         ;;
+edit)  nano $src_dir/$target_name.c
+	;;	
+
 *)
         echo "Err: Unknown command: $1"
         usage

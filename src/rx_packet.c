@@ -55,15 +55,17 @@ int main (void) {
         sleep(1);
 	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
-	char data = 0;
+	int len =cc1200_reg_read(PKT_LEN,0);
+	int data;
 	while (true) {
-		int variable =cc1200_reg_read(PXT_LEN,0);
-		printf("INFO: CC1200: NUM_RXBYTES: %d\n", variable);
+		int variable =cc1200_reg_read(NUM_RXBYTES,0);
+		//printf("INFO: CC1200: NUM_RXBYTES: %d\n", variable);
 		if(variable){
-			data = (char) cc1200_reg_read(RXLAST, 0);
+			data =cc1200_reg_read(FIFO, 0);
 			printf("INFO: CC1200: RXFIRST: %d\n", (int) data);
 			printf("INFO: CC1200: RXFIRST: %c\n", (char) data);
 			sleep(1);
+			
 		}
 	}
 
