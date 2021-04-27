@@ -13,7 +13,7 @@ usage() {
         echo "Commands:"
         echo -e "    \e[1mcmake\e[0m   runs cmake in target dir"
         echo -e "    \e[1mbuild\e[0m   runs cmake --build target"
-        echo -e "    \e[1mexec\e[0m    lists executables in target dir"
+        echo -e "    \e[1mstatus\e[0m  prints some status information"
         echo -e "    \e[1mclean\e[0m   rm -rf ./target"
         echo -e "    \e[1medit\e[0m    opens $target_name.c with editor"
         echo -e "    \e[1m<bin>\e[0m   executes <bin> in target dir"
@@ -52,7 +52,7 @@ cmake)
 build)
         cmake --build $TARGET_DIR
         ;;
-exec)
+status)
         EXECUTABLES=$(find $TARGET_DIR -maxdepth 1 -perm -111 -type f)
         info "Found executables:"
         while IFS= read -r exec; do
