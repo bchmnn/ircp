@@ -7,7 +7,8 @@
 #ifndef CC1200_REG_H
 #define CC1200_REG_H
 
-#define  FIFO		    0x37	
+#define  RXFIFO		    0x3F
+#define  TXFIFO		    0x3F	
  
 #define  IOCFG3             0x00 
 #define  IOCFG2             0x01 

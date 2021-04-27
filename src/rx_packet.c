@@ -15,6 +15,8 @@
 #include "cc1200_reg.h"
 #include "cc1200_mode_rx_packet.h"
 
+#define CRC16 2
+
 void sigint_handler(int status) {
 	printf("\nWARN: Received SIGINT: %d\n", status);
         printf("INFO: Shutting down SPI...\n");
@@ -43,6 +45,9 @@ int main (void) {
   	// reprogram the registers
         cc1200_regs_write(RegSettings, MAX_REG);
         cc1200_regs_write(ExtRegSettings, MAX_EXT_REG);
+        int pkt_cfg0 = cc1200_reg_read(PKT_CFG0, 0);
+        pkt_cfg0 |= 1 << 5;
+        cc1200_reg_write(PKT_CFG0, pkt_cfg0);
 
  	// get status information
         // SNOP command has to be executed prior to status retrieval
@@ -53,20 +58,35 @@ int main (void) {
         // receive mode
 	cc1200_cmd(SRX);
         sleep(1);
+
 	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
-	int len =cc1200_reg_read(PKT_LEN,0);
+        int len = cc1200_reg_read(PKT_LEN, 0);
+        // int buff_p = 0;
+        // int *buff = malloc(sizeof(int)*(len+2));
+
 	int data;
 	while (true) {
-		int variable =cc1200_reg_read(NUM_RXBYTES,0);
-		//printf("INFO: CC1200: NUM_RXBYTES: %d\n", variable);
-		if(variable){
-			data =cc1200_reg_read(FIFO, 0);
-			printf("INFO: CC1200: RXFIRST: %d\n", (int) data);
-			printf("INFO: CC1200: RXFIRST: %c\n", (char) data);
-			sleep(1);
-			
-		}
+		int variable = cc1200_reg_read(NUM_RXBYTES,0);
+                if (!variable)
+                        continue;
+
+                len = cc1200_reg_read(RXFIFO, 0) + CRC16;
+                printf("INFO: Receiving packet with length: %d\n", len);
+                while (len) {
+                        if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
+                                continue;
+                        }
+                        int recv = cc1200_reg_read(RXFIFO, 0);
+                        // printf("%c:%d|", (char) recv, (int) recv);
+                        if (len > 2)
+                                printf("%c", (char) recv);
+                        fflush(stdout);
+
+                        len--;
+                }
+                printf("\nINFO: Successfully received packet\n");
+                
 	}
 
 	// shutdown SPI
