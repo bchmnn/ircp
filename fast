@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 TARGET_DIR="target"
-target_name="rx_packet"
+target_name="tx_rssi"
 SRC_DIR="src"
 
 WORKING_DIR=$(pwd)
