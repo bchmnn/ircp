@@ -16,3 +16,5 @@ add_executable(rx_packet "src/rx_packet.c")
 add_executable(tx_rssi "src/tx_rssi.c")
 add_executable(tx_packet "src/tx_packet.c")
 add_executable(tx_packet_fh "src/tx_packet_freq_hop.c")
+add_executable(rx_packet_fh "src/rx_packet_freq_hop.c")
+
