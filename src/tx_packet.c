@@ -48,29 +48,32 @@ int main (void) {
         cc1200_regs_write(RegSettings, MAX_REG);
         cc1200_regs_write(ExtRegSettings, MAX_EXT_REG);
 
+        int pkt_cfg0 = cc1200_reg_read(PKT_CFG0, 0);
+        pkt_cfg0 |= 1 << 5;
+        cc1200_reg_write(PKT_CFG0, pkt_cfg0);
+
  	// get status information
         // SNOP command has to be executed prior to status retrieval
   	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
 
+        cc1200_reg_write(PKT_LEN, 0xff);
+
 	int len = cc1200_reg_read(PKT_LEN, 0);
 	printf("INFO: Configured packet len: %d\n", len);
 
-	//cc1200_cmd(SFTX);
-	//usleep(MS_IN_U(100));
-
 	char *data ="HalloHallo\0";
-	cc1200_reg_write(TXFIFO, 9);
+	cc1200_reg_write(TXFIFO, 10);
+
 	while (*data != '\0') {
 		int c = *data;
 		cc1200_reg_write(TXFIFO , c);
 		printf("DEBUG: int: %d , char:  %c \n", c, c);
-		usleep(MS_IN_U(100));
+		usleep(MS_IN_U(10));
 		data++;
-
 	}
 
-	// usleep(MS_IN_U(100));
+	usleep(MS_IN_U(100));
 
 	int fifo = cc1200_reg_read(NUM_TXBYTES, 0);
 	printf("INFO: Number of bytes in tx fifo: %d\n", fifo);
