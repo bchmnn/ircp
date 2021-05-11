@@ -57,7 +57,7 @@ int main (void) {
         cc1200_reg_write(PREAMBLE_CFG1, NUM_PREAMBLE_30_B);
 
         // sym_rate2 = cc1200_reg_read(SYMBOL_RATE2, 0);
-        int sym_rate2 = 0b11111;
+        int sym_rate2 = 0b111111;
         cc1200_reg_write(SYMBOL_RATE2, sym_rate2);
 
  	// get status information
