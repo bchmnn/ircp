@@ -16,6 +16,7 @@ sender:
 
 empfaenger:
 """
+enable preamble detection
 for each frequency:
   set frequency
   if first frequency:
