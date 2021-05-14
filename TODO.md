@@ -19,6 +19,8 @@ empfaenger:
 enable preamble detection
 for each frequency:
   set frequency
+  gehe in sende modus
+  reg sichern
   if first frequency:
     save kalibration
   else:
@@ -27,3 +29,11 @@ for each frequency:
   if rssi high:
     recv packet
 """
+
+
+* WLAN
+* Interferenz Erkennung
+
+
+
+

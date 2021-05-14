@@ -60,6 +60,11 @@ int main (void) {
         int sym_rate2 = 0b111111;
         cc1200_reg_write(SYMBOL_RATE2, sym_rate2);
 
+        // 868 hz
+        cc1200_reg_write(FREQ2, 0x56);
+        cc1200_reg_write(FREQ1, 0xcc);
+        cc1200_reg_write(FREQ0, 0xcc);
+
  	// get status information
         // SNOP command has to be executed prior to status retrieval
   	cc1200_cmd(SNOP);
