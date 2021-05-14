@@ -73,4 +73,24 @@ int get_status_cc1200(void);
 char *get_status_cc1200_str(void);
 ```
 
+** status register 
+
+
+/* command strobes */
++ SRES     0x30 /**< CC1200 in den Ausgangszustand setzen (Chip reset). */
++ SFSTXON  0x31 /**< Schalte den Frequenzsynthesizer ein und kalibriere ihn. */
++ SXOFF    0x32 /**< Gehe in den XOFF Zustand. */
++ SCAL     0x33 /**< Kalibriere Frequenzsynthesizer und schalte ihn aus. */
++ SRX      0x34 /**< Kalibriere Chip und schalte in den Empfangsmodus. */
++ STX      0x35 /**< Schalte in den Sendemodus. */
++ SIDLE    0x36 /**< Gehe in den Ruhezustand. */
++ SAFC     0x37 /**< Führe eine automatische Frequenz-Kompensation (AFC) aus. */
++ SWOR     0x38 /**< Starte die automatische RX polling Sequenz. */
++ SPWD     0x39 /**< Gehe in des SLEEP Mode. */
++ SFRX     0x3A /**< Lösche den RX FIFO. */
++ SFTX     0x3B /**< Lösche den TX FIFO. */
++ SWORRST  0x3C /**< Setze die eWOR Zeit. */
++ SNOP     0x3D  /**< Kein Kommando. 
+                           * Wird benutzt um den Zustand des CC1200 zu ermitteln */
+
 
