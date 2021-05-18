@@ -14,12 +14,13 @@ RSSI: SNR - Signal to noice ratio
 * [Begleboard Linux](https://beagleboard.org/linux/)
 * [TKN Wiki](https://kn-pr.tkn.tu-berlin.de/wiki/doku.php)
 * [User’s Guide of the CC1200](http://www.ti.com/lit/ug/swru346b/swru346b.pdf)
+* [Overleaf](https://www.overleaf.com/project/60a3f53ab54bfe34a84f8c81)
 
 ## TODOs
 * [x] Setup Beagleboards
 * [x] Expose SSH
-* [ ] Setup deploy-script
-* [ ] Setup CI/CD
+* [x] Setup deploy-script
+* [x] Setup CI/CD
 
 ## Services
 * Copy the `./docs/*.service` files to `/etc/systemd/system/.`

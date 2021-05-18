@@ -7,7 +7,6 @@
 * [Satcom RFI Recognition&Classification](https://www.mdpi.com/2076-3417/10/13/4608)
 * [RFI Classification](https://academic.oup.com/mnras/article/405/1/155/1020990?login=true)
 
-
-
 ## Ratke:
 * packet discrimination / ursache paket fehler
+
