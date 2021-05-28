@@ -34,6 +34,10 @@ for each frequency:
 * WLAN
 * Interferenz Erkennung
 
-
-
-
+## Devops
+* fake.sh
+* documentation:
+  - toolchain
+  - setup fake.conf
+  - setup vscode
+* fake: howto add to path

@@ -1,4 +1,5 @@
 debug
 target
-built
 build
+fake.conf.ps1
+.vscode/c_cpp_properties.json

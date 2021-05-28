@@ -1,0 +1,6 @@
+{
+    "editor.tabSize": 8,
+    "cmake.preferredGenerators": ["Ninja"],
+    "cmake.configureArgs": ["-DCMAKE_SYSTEM_NAME=Generic"],
+    "cmake.buildDirectory": "${workspaceFolder}/target"
+}

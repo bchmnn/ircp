@@ -1,20 +1,21 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.20)
 project (CC1200)
+
+set (CMAKE_SYSTEM_NAME Generic)
+set (CMAKE_SYSTEM_PROCESSOR ARM)
 
 set (CMAKE_C_STANDARD 99)
 set (CMAKE_C_STANDARD_REQUIRED ON)
-set (LOCAL_LIB "/usr/local/lib")
-set (PRUSS_LIBS "-Wl,-rpath=$(LOCAL_LIB) -L$(LOCAL_LIB) -lprussdrv")
-set (SPI_LIB "-L${LOCAL_LIB} -lspi")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${SPI_LIB} ${PRUSS_LIBS}")
+
+set (CMAKE_CROSS_COMPILING TRUE)
+
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-a8 -O2 -Wall -Wextra -Werror")
+set (CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath=lib")
 
 include_directories(include)
+link_directories(lib)
 file(GLOB SOURCES "src/*.c")
 
-add_executable(rx_rssi "src/rx_rssi.c")
-add_executable(rx_packet "src/rx_packet.c")
-add_executable(tx_rssi "src/tx_rssi.c")
-add_executable(tx_packet "src/tx_packet.c")
-add_executable(tx_packet_fh "src/tx_packet_freq_hop.c")
-add_executable(rx_packet_fh "src/rx_packet_freq_hop.c")
+add_executable(target "src/main.c")
 
+target_link_libraries(target prussdrv spi)
