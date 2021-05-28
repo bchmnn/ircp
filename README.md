@@ -16,12 +16,6 @@ RSSI: SNR - Signal to noice ratio
 * [User’s Guide of the CC1200](http://www.ti.com/lit/ug/swru346b/swru346b.pdf)
 * [Overleaf](https://www.overleaf.com/project/60a3f53ab54bfe34a84f8c81)
 
-## TODOs
-* [x] Setup Beagleboards
-* [x] Expose SSH
-* [x] Setup deploy-script
-* [x] Setup CI/CD
-
 ## Services
 * Copy the `./docs/*.service` files to `/etc/systemd/system/.`
 * Extract `./archives/*` to `/srv/.`
@@ -34,7 +28,8 @@ RSSI: SNR - Signal to noice ratio
 * `sudo systemctl start <name>.service` or `sudo reboot`
 
 ## Building
-* Use the bash-script `fast` for that
+* Use the bash-script `fast` for that:
+
 ```
 $ ./fast help
 Usage: ./fast <command>
@@ -46,6 +41,12 @@ Commands:
     help    show this screen
 ```
 * The resulting executable will be ./target/main
+
+## Cross compiling
+* Download toolchain from: https://releases.linaro.org/components/toolchain/binaries/
+* Select a version (`latest-7` worked for me)
+* Download, extract, copy to desired location, add to path
+* Let vscode generate `c_cpp_properties.json` for you and then change `"configurations"."compilerPath"` to the `gcc` version of this toolchain
 
 ## Basic inforamtion
 * CC1200: basic registers: 0x00
