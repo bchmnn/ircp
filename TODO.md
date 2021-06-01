@@ -1,43 +1,12 @@
+# Code
 * [ ] rx_packet: re-enter recv mode
+* [ ] extract major functionality to lib
 
----
-1. frequency programmieren
-2. preamble auf maximale groesse setzen
-   - sender sendet
-   - empfaenger hat waehrend preamble zeit frequenz zu finden
-3. symbol rate evtl runterstellen, da sonst nicht schnell genug
-4. brute force frequenzen
-   - nach frequenzy kalibierung -> reg sichern, damit nicht jedes mal neu kalibriert werden muss
-5. finde sender -> messe rssi -> wenn rssi empfangen -> rest automatisch
-
-sender:
-- preamble zeit: max
-- symbol rate: min
-
-empfaenger:
-"""
-enable preamble detection
-for each frequency:
-  set frequency
-  gehe in sende modus
-  reg sichern
-  if first frequency:
-    save kalibration
-  else:
-    write kalibration
-  check rssi
-  if rssi high:
-    recv packet
-"""
-
-
-* WLAN
-* Interferenz Erkennung
-
-## Devops
-* fake.sh
-* documentation:
-  - toolchain
-  - setup fake.conf
-  - setup vscode
-* fake: howto add to path
+# Devops
+* [x] fake.sh
+* [x] documentation:
+  - [x] toolchain
+  - [x] setup fake.conf
+  - [x] setup vscode
+* [x] fake: howto add to path
+* [x] fake: pass flags to execution
