@@ -4,11 +4,6 @@
 * Beagleboard Black
 * CC1200
 
-RSSI: SNR - Signal to noice ratio
-      SIR - Signal to interference ratio
-      Symbolrate - Symbols per second
-      Bitrate - Bits per second
-
 ## Links
 * [Begleboard getting-started](https://beagleboard.org/getting-started/)
 * [Begleboard Linux](https://beagleboard.org/linux/)
@@ -16,7 +11,7 @@ RSSI: SNR - Signal to noice ratio
 * [User’s Guide of the CC1200](http://www.ti.com/lit/ug/swru346b/swru346b.pdf)
 * [Overleaf](https://www.overleaf.com/project/60a3f53ab54bfe34a84f8c81)
 
-## Services
+## Systemd services (cc1200d and 4C)
 * Copy the `./docs/*.service` files to `/etc/systemd/system/.`
 * Extract `./archives/*` to `/srv/.`
 	* `/srv/cc1200d/cc1200d` needs to be executable
@@ -28,84 +23,31 @@ RSSI: SNR - Signal to noice ratio
 * `sudo systemctl start <name>.service` or `sudo reboot`
 
 ## Building
-* Use the bash-script `fast` for that:
+* Use the script `fake` for that: https://github.com/bchmnn/fake
+* The resulting executable will be `./target/target`
 
-```
-$ ./fast help
-Usage: ./fast <command>
-Commands:
-    cmake   runs cmake in dir target
-    build   runs cmake --build target
-    exec    runs the target binary
-    clean   rm -rf ./target
-    help    show this screen
-```
-* The resulting executable will be ./target/main
-
-## Cross compiling
+## Building - Cross compiling
+### Setup - Toolchain
 * Download toolchain from: https://releases.linaro.org/components/toolchain/binaries/
 * Select a version (`latest-7` worked for me)
 * Download, extract, copy to desired location, add to path
-* Let vscode generate `c_cpp_properties.json` for you and then change `"configurations"."compilerPath"` to the `gcc` version of this toolchain
+* Let vscode generate `c_cpp_properties.json` for you and then change `"configurations"."compilerPath"` to the `gcc` version of the linaro toolchain
 
-## Fake config
+### Setup - Fake
 * Create a file in the repositories root folder:
     * Windows: `fake.conf.ps1`
     * Unix: `fake.conf.sh`
-* This file will be sourced by `fake`
+* This file will be sourced by the `fake` script
 * Use this file to set some environment variables (ps1):
-```ps1
-$env:CC=(which arm-linux-gnueabihf-gcc)
-$FAKE_CMAKE_FLAGS='-D CMAKE_SYSTEM_NAME=Generic -G "Ninja"'
-$FAKE_EXEC_HOST="beagle1"
-```
-* For unix analog
+    ```ps1
+    # ps1 version (unix analog)
+    $env:CC=(which arm-linux-gnueabihf-gcc)
+    $FAKE_CMAKE_FLAGS='-D CMAKE_SYSTEM_NAME=Generic -G "Ninja"'
+    $FAKE_EXEC_HOST="beagle1"
+    ```
 
-## Basic inforamtion
-* CC1200: basic registers: 0x00
-* CC1200: extended registers: 0x2fxx (0x2f00 offset) 
-
-```c
-// returns true on success
-int spi_init(void);
-
-// has to be called if `spi_init` was called before
-void spi_shutdown(void);
-
-// returns written value
-int cc1200_reg_write(int adr, int val);
-
-// returns read value
-int cc1200_reg_read(int adr, int *val);
-
-int cc1200_cmd(int cmd);
-
-// cc1200_cmd(SNOP) has to be called before
-// returns last available status
-int get_status_cc1200(void);
-
-// return last available status as string
-char *get_status_cc1200_str(void);
-```
-
-** status register 
-
-
-/* command strobes */
-+ SRES     0x30 /**< CC1200 in den Ausgangszustand setzen (Chip reset). */
-+ SFSTXON  0x31 /**< Schalte den Frequenzsynthesizer ein und kalibriere ihn. */
-+ SXOFF    0x32 /**< Gehe in den XOFF Zustand. */
-+ SCAL     0x33 /**< Kalibriere Frequenzsynthesizer und schalte ihn aus. */
-+ SRX      0x34 /**< Kalibriere Chip und schalte in den Empfangsmodus. */
-+ STX      0x35 /**< Schalte in den Sendemodus. */
-+ SIDLE    0x36 /**< Gehe in den Ruhezustand. */
-+ SAFC     0x37 /**< Führe eine automatische Frequenz-Kompensation (AFC) aus. */
-+ SWOR     0x38 /**< Starte die automatische RX polling Sequenz. */
-+ SPWD     0x39 /**< Gehe in des SLEEP Mode. */
-+ SFRX     0x3A /**< Lösche den RX FIFO. */
-+ SFTX     0x3B /**< Lösche den TX FIFO. */
-+ SWORRST  0x3C /**< Setze die eWOR Zeit. */
-+ SNOP     0x3D  /**< Kein Kommando. 
-                           * Wird benutzt um den Zustand des CC1200 zu ermitteln */
-
-
+## Vocabulary
+* **RSSI/SNR** - Signal to noice ratio
+* **SIR** - Signal to interference ratio
+* **Symbolrate** - Symbols per second
+* **Bitrate** - Bits per second
