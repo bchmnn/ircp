@@ -48,6 +48,19 @@ Commands:
 * Download, extract, copy to desired location, add to path
 * Let vscode generate `c_cpp_properties.json` for you and then change `"configurations"."compilerPath"` to the `gcc` version of this toolchain
 
+## Fake config
+* Create a file in the repositories root folder:
+    * Windows: `fake.conf.ps1`
+    * Unix: `fake.conf.sh`
+* This file will be sourced by `fake`
+* Use this file to set some environment variables (ps1):
+```ps1
+$env:CC=(which arm-linux-gnueabihf-gcc)
+$FAKE_CMAKE_FLAGS='-D CMAKE_SYSTEM_NAME=Generic -G "Ninja"'
+$FAKE_EXEC_HOST="beagle1"
+```
+* For unix analog
+
 ## Basic inforamtion
 * CC1200: basic registers: 0x00
 * CC1200: extended registers: 0x2fxx (0x2f00 offset) 
