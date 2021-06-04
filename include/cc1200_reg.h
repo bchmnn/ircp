@@ -7,6 +7,24 @@
 #ifndef CC1200_REG_H
 #define CC1200_REG_H
 
+
+
+
+#include <SPIv1.h>
+
+
+
+
+
+
+
+
+
+
+
+#define MAX_REG             47
+#define MAX_EXT_REG         130
+
 #define  RXFIFO		    0x3F
 #define  TXFIFO		    0x3F	
  
@@ -187,6 +205,10 @@
 #define  FIFO_NUM_TXBYTES   0x2FD8
 #define  FIFO_NUM_RXBYTES   0x2FD9
 #define  RXFIFO_PRE_BUF     0x2FDA
+
+
+
+
 
 typedef struct {
         int adr;

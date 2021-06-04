@@ -20,23 +20,23 @@
 #define NUM_FREQ_REGS 6
 #define CRC16 2
 
-REG_TYPE freq [NUM_FREQ][NUM_FREQ_REGS] = {
-	{ 
-		{ FREQ2,   0x5b },
-     		{ FREQ1,   0x80 },
-     		{ FREQ0,   0x00 },
-                { FS_CHP,  0x2a },
-                { FS_VCO4, 0x11 },
-                { FS_VCO2, 0x64 }
-	}, {
-		{ FREQ2,   0x56 },
-     		{ FREQ1,   0xcc },
-     		{ FREQ0,   0xcc },
-                { FS_CHP,  0x2b },
-                { FS_VCO4, 0x11 },
-                { FS_VCO2, 0x4c }
-	}
-};
+// REG_TYPE freq [NUM_FREQ][NUM_FREQ_REGS] = {
+// 	{ 
+// 		{ FREQ2,   0x5b },
+//      		{ FREQ1,   0x80 },
+//      		{ FREQ0,   0x00 },
+//                 { FS_CHP,  0x2a },
+//                 { FS_VCO4, 0x11 },
+//                 { FS_VCO2, 0x64 }
+// 	}, {
+// 		{ FREQ2,   0x56 },
+//      		{ FREQ1,   0xcc },
+//      		{ FREQ0,   0xcc },
+//                 { FS_CHP,  0x2b },
+//                 { FS_VCO4, 0x11 },
+//                 { FS_VCO2, 0x4c }
+// 	}
+// };
 
 
 

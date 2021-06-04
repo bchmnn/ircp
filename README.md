@@ -74,7 +74,8 @@ Message:
     - 3: chat: <msg> = text
     - 4: chat-ack
     - 5: i'm here
-    - 6: i'm here-ack
+    - 6: i'm here-ack: <msg> = rssi
+    - 7:  ciao!
 ==================Protocol===================
 1. Handshake
   - predefined meeting frequency: 920 hz

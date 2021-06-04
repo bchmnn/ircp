@@ -65,7 +65,7 @@ int main (void) {
         // int buff_p = 0;
         // int *buff = malloc(sizeof(int)*(len+2));
 
-	int data;
+	//int data;
 	while (true) {
 		int variable = cc1200_reg_read(NUM_RXBYTES,0);
                 if (!variable)

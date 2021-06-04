@@ -3,7 +3,8 @@
  * @author Garrit Honselmann
  **/
 
-
+#ifndef SPIV1
+#define SPIV1
 // Extended Register Space
 #define EXT_ADR 0x2F00
 
@@ -100,3 +101,4 @@ int spi_init(void);
  **/
 void spi_shutdown(void);
 
+#endif

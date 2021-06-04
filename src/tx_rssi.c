@@ -57,7 +57,7 @@ int main (void) {
         sleep(1);
 	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
-	signed char rssi = 0;
+	//signed char rssi = 0;
 	while (true) {
 		sleep(1);
 

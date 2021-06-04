@@ -1,6 +1,12 @@
 {
     "editor.tabSize": 8,
-    "cmake.preferredGenerators": ["Ninja"],
     "cmake.configureArgs": ["-DCMAKE_SYSTEM_NAME=Generic"],
-    "cmake.buildDirectory": "${workspaceFolder}/target"
+    "cmake.buildDirectory": "${workspaceFolder}/target",
+    "files.associations": {
+        "array": "c",
+        "string": "c",
+        "string_view": "c",
+        "random": "c",
+        "cc1200_reg.h": "c"
+    }
 }
