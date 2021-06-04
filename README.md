@@ -37,12 +37,10 @@
 * On windows do not set `cppStandard` in `c_cpp_properties.json` as it breaks the CMake generation process
 * The `.vscode/settings.json` should look like this:
   ```json
-  {
-      "editor.tabSize": 8,
-      "cmake.preferredGenerators": ["Ninja"],
-      "cmake.configureArgs": ["-DCMAKE_SYSTEM_NAME=Generic"],
-      "cmake.buildDirectory": "${workspaceFolder}/target"
-  }
+  "cmake.preferredGenerators": ["Ninja"],
+  "cmake.configureArgs": ["-DCMAKE_SYSTEM_NAME=Generic"],
+  "cmake.parallelJobs": 8,
+  "cmake.buildDirectory": "${workspaceFolder}/target"
   ```
 
 ### Setup - Fake
