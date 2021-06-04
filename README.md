@@ -34,6 +34,16 @@
 * Download, extract, copy to desired location, add to path
 * Let vscode generate `c_cpp_properties.json` for you and then change `"configurations"."compilerPath"` to the `gcc` version of the linaro toolchain
 * Also change `cStandard` in `c_cpp_properties.json` to `gnu99`
+* On windows do not set `cppStandard` in `c_cpp_properties.json` as it breaks the CMake generation process
+* The `.vscode/settings.json` should look like this:
+  ```json
+  {
+      "editor.tabSize": 8,
+      "cmake.preferredGenerators": ["Ninja"],
+      "cmake.configureArgs": ["-DCMAKE_SYSTEM_NAME=Generic"],
+      "cmake.buildDirectory": "${workspaceFolder}/target"
+  }
+  ```
 
 ### Setup - Fake
 * Create a file in the repositories root folder:
@@ -75,7 +85,7 @@ Message:
     - 4: chat-ack
     - 5: i'm here
     - 6: i'm here-ack: <msg> = rssi
-    - 7:  ciao!
+    - 7: ciao!
 ==================Protocol===================
 1. Handshake
   - predefined meeting frequency: 920 hz

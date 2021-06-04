@@ -14,8 +14,8 @@ set (CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath=lib")
 
 include_directories(include)
 link_directories(lib)
-file(GLOB SOURCES "src/cc1200*.c")
+file(GLOB SOURCES "src/*.c")
 
-add_executable(target ${SOURCES} )
+add_executable(target ${SOURCES})
 
 target_link_libraries(target prussdrv spi)

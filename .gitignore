@@ -1,7 +1,6 @@
+.vscode
 debug
 target
 build
-fake.conf.ps1
-fake.conf.sh
-.vscode/c_cpp_properties.json
+fake.conf.*
 gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf
