@@ -55,9 +55,16 @@ void cc1200_init_reg (REG_TYPE* RegSettings, REG_TYPE* ExtRegSettings  ){
 
 }
 
-void set_mode(int value){
-        cc1200_reg_write(PKT_CFG0, value);       
+void set_mode(int value,int len){
+        int pkt_cfg0 = cc1200_reg_read(PKT_CFG0, 0);
+        pkt_cfg0 |= value;
+        cc1200_reg_write(PKT_CFG0, value);  
+
+         cc1200_reg_write(PKT_LEN, len);
 }
+
+
+
 void set_preamble(int value){
         cc1200_reg_write(PREAMBLE_CFG1, value);
 }
@@ -141,6 +148,8 @@ void gen_random_massage(char *s, const int len) {
 }
 
 void write_txFifo( char* data, int len){
+       
+       cc1200_reg_write(TXFIFO , len);
         data[len] = 0;
         while (*data != '\0') {
 	        int c = *data;
@@ -153,6 +162,9 @@ void write_txFifo( char* data, int len){
 }
 
 int cc1200_rx_preparar(   ){
+
+        set_mode(MODE_VARIABLE_LENGTH,PKT_LEN_VARIABLE_MODE);
+
         printf("INFO: Putting into receive mode...\n");
         // receive mode
 	cc1200_cmd(SRX);
@@ -177,8 +189,8 @@ void cc1200_rx( int len ){
                         flag--;
                         continue;
                 }
-                //len = cc1200_reg_read(RXFIFO, 0) + CRC16;
-                int pkt_len = len+CRC16;
+                int pkt_len = cc1200_reg_read(RXFIFO, 0) + CRC16;
+                //int pkt_len = len+CRC16;
                 printf("INFO: Receiving packet with length: %d\n", len);
                 while (pkt_len) {
                         if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
@@ -198,15 +210,18 @@ void cc1200_rx( int len ){
                 
         }//return buffer;
 }
-void cc1200_tx( /*int Pkt_len*/ ){
+void cc1200_tx( int Pkt_len ){
 
+         set_mode(MODE_VARIABLE_LENGTH,PKT_LEN_VARIABLE_MODE);
+        
         //cc1200_reg_write(PKT_LEN, Pkt_len);
         
-	int len = cc1200_reg_read(PKT_LEN, 0);
-	printf("INFO: Configured packet len: %d\n", len);
-        char buffer[] = "HalloHallo\0" ;
-        // gen_random_massage(buffer, len);
-        write_txFifo( buffer, len);
+	//int len = cc1200_reg_read(PKT_LEN, 0);
+	//printf("INFO: Configured packet len: %d\n", len);
+        char buffer[Pkt_len];
+        //char buffer[] = "HalloHallo\0" ;
+        gen_random_massage(buffer, Pkt_len);
+        write_txFifo( buffer, Pkt_len);
 
         // transmit  mode
 	cc1200_cmd(STX);

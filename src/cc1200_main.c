@@ -32,7 +32,7 @@ void sigint_handler(int status) {
 
 	 while (1)
 	 {
-		cc1200_tx();
+		cc1200_tx(50);
 		cc1200_rx( cc1200_rx_preparar(   ));
 	 }
 	 
