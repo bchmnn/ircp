@@ -156,7 +156,7 @@ int cc1200_rx_preparar(   ){
         printf("INFO: Putting into receive mode...\n");
         // receive mode
 	cc1200_cmd(SRX);
-        sleep(1);
+        wait_till_mode(RX, 10000, false);
 
 	cc1200_cmd(SNOP);
   	printf("INFO: Status: %s\n", get_status_cc1200_str());
@@ -180,17 +180,17 @@ void cc1200_rx( int len ){
                 //len = cc1200_reg_read(RXFIFO, 0) + CRC16;
                 int pkt_len = len+CRC16;
                 printf("INFO: Receiving packet with length: %d\n", len);
-                while (len) {
+                while (pkt_len) {
                         if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
                                 continue;
                         }
                         buffer[len+CRC16 - pkt_len ] = cc1200_reg_read(RXFIFO, 0);
                         // printf("%c:%d|", (char) recv, (int) recv);
-                        if (len > 2)
+                        if (pkt_len > 2)
                                 printf("%c", (char) buffer[len+CRC16 - pkt_len ]);
                         fflush(stdout);
 
-                        len--;
+                        pkt_len--;
                 }
                 printf("\nINFO: Successfully received packet\n");
                 flag =0;
@@ -204,13 +204,14 @@ void cc1200_tx( /*int Pkt_len*/ ){
         
 	int len = cc1200_reg_read(PKT_LEN, 0);
 	printf("INFO: Configured packet len: %d\n", len);
-        char buffer[len];
-
-        gen_random_massage(buffer, len);
+        char buffer[] = "HalloHallo\0" ;
+        // gen_random_massage(buffer, len);
         write_txFifo( buffer, len);
 
         // transmit  mode
 	cc1200_cmd(STX);
+
+        wait_till_mode(IDLE, 10000, false);
 
 }
         
