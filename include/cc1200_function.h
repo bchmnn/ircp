@@ -40,8 +40,8 @@ void get_freg_reg(REG_TYPE* fre, int* value, int len);
 int wait_till_mode(int mode, int timeout_ms, bool exit_on_timeout);
 int wait_till_bytes_in_queue(int timeout_ms, bool exit_on_timeout);
 
-void cc1200_tx(int pkt_len);
-void cc1200_rx(int len);
+void cc1200_tx(char* packet, int len);
+char* cc1200_rx();
 int cc1200_rx_preparar();
 
 #endif //CC1200_FUNCTION_H

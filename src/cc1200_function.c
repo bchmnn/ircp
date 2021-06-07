@@ -135,7 +135,7 @@ void gen_random_massage(char *s, const int len) {
 	s[len] = 0;
 }
 
-void write_txFifo(char* data, int len) {
+void write_tx_fifo(char* data, int len) {
 
 	cc1200_reg_write(TXFIFO , len);
 	data[len] = 0;
@@ -151,69 +151,61 @@ void write_txFifo(char* data, int len) {
 
 int cc1200_rx_preparar() {
 
-	set_mode(MODE_VARIABLE_LENGTH,PKT_LEN_VARIABLE_MODE);
+	set_mode(MODE_VARIABLE_LENGTH, PKT_LEN_VARIABLE_MODE);
 
-	printf("INFO: Putting into receive mode...\n");
+	// printf("INFO: Putting into receive mode...\n");
 	// receive mode
 	cc1200_cmd(SRX);
-	wait_till_mode(RX, 10000, false);
+	wait_till_mode(RX, 1000, false);
 
 	cc1200_cmd(SNOP);
-	printf("INFO: Status: %s\n", get_status_cc1200_str());
+	// printf("INFO: Status: %s\n", get_status_cc1200_str());
 	
 	return cc1200_reg_read(PKT_LEN, 0);
-	// int buff_p = 0;
-	// int *buff = malloc(sizeof(int)*(len+2));
 }
 
 
-void cc1200_rx(int len) {
+char* cc1200_rx() {
 
-	int buffer[len+CRC16];
-	int flag = 1000000;
+	int cnt = 0;
+	char* buf = malloc(sizeof(char)*(256 + CRC16));
 
-	while (flag) {
-		int variable = cc1200_reg_read(NUM_RXBYTES,0);
-		if (!variable){
-			flag--;
+	int wait = 1000;
+
+	while (wait) {
+		if (!cc1200_reg_read(NUM_RXBYTES,0)) {
+			usleep(10);
+			wait--;
 			continue;
 		}
+
 		int pkt_len = cc1200_reg_read(RXFIFO, 0) + CRC16;
-		//int pkt_len = len+CRC16;
-		printf("INFO: Receiving packet with length: %d\n", len);
 		while (pkt_len) {
 			if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
 				continue;
 			}
-			buffer[len+CRC16 - pkt_len ] = cc1200_reg_read(RXFIFO, 0);
-			// printf("%c:%d|", (char) recv, (int) recv);
-			if (pkt_len > 2)
-				printf("%c", (char) buffer[len+CRC16 - pkt_len ]);
-			fflush(stdout);
-
+			buf[cnt++] = cc1200_reg_read(RXFIFO, 0);
 			pkt_len--;
 		}
-		printf("\nINFO: Successfully received packet\n");
-		flag = 0;
+		// TODO crc is truncated. Make struct instead: { msg, crc }
+		buf[cnt-2] = '\0';
+		break;
 	}
+
+	buf[cnt] = '\0';
+	return buf;
 }
 
-void cc1200_tx(int pkt_len) {
+void cc1200_tx(char* packet, int len) {
+	if (len > 256) {
+		printf("ERROR: packet len max 256: instead %d\n", len);
+		return;
+	}
 
 	set_mode(MODE_VARIABLE_LENGTH, PKT_LEN_VARIABLE_MODE);
-	
-	//cc1200_reg_write(PKT_LEN, pkt_len);
-	
-	//int len = cc1200_reg_read(PKT_LEN, 0);
-	//printf("INFO: Configured packet len: %d\n", len);
-	char buffer[pkt_len];
-	//char buffer[] = "HalloHallo\0" ;
-	gen_random_massage(buffer, pkt_len);
-	write_txFifo(buffer, pkt_len);
+	write_tx_fifo(packet, len);
 
-	// transmit  mode
 	cc1200_cmd(STX);
 
-	wait_till_mode(IDLE, 10000, false);
-
+	wait_till_mode(IDLE, 1000, false);
 }
