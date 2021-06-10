@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <unistd.h>
 #include <signal.h>
+#include <unistd.h>
 
-#include <SPIv1.h>
+#include <external/SPIv1.h>
 #include "cc1200_reg.h"
 
 #define MS_IN_U(ms) (ms * 1000)

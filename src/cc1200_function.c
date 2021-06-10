@@ -44,7 +44,7 @@ void cc1200_init_reg(REG_TYPE* RegSettings, REG_TYPE* ExtRegSettings) {
 	printf("INFO: Status: %s\n", get_status_cc1200_str());
 }
 
-void set_mode(int value,int len) {
+void set_mode(int value, int len) {
 	int pkt_cfg0 = cc1200_reg_read(PKT_CFG0, 0);
 	pkt_cfg0 |= value;
 	cc1200_reg_write(PKT_CFG0, value);

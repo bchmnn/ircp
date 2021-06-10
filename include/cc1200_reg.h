@@ -7,7 +7,7 @@
 #ifndef CC1200_REG_H
 #define CC1200_REG_H
 
-#include <SPIv1.h>
+#include <external/SPIv1.h>
 
 #define MAX_REG             47
 #define MAX_EXT_REG         130
