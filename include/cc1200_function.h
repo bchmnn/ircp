@@ -29,6 +29,26 @@
 #define NUM_FREQ_REGS 6
 #define CRC16 2
 
+typedef struct {
+	u_int8_t len;
+	char* pkt;
+	int8_t rssi;              // CRC16[0]
+	u_int8_t link_quality: 7; // CRC16[1][0:6]
+	u_int8_t crc_status: 1;   // CRC16[1][7]
+} cc1200_pkt_t;
+
+/**
+ * Allocates memory for cc1200_pkt_t
+ * @param len  len of underlying char* pkt to allocate
+ */
+cc1200_pkt_t* malloc_cc1200_pkt(u_int8_t len);
+
+/**
+ * Frees pkt struct and fields;
+ */
+void free_cc1200_pkt(cc1200_pkt_t* pkt);
+
+
 int cc1200_init();
 void cc1200_init_reg(REG_TYPE* RegSettings, REG_TYPE* ExtRegSettings);
 void set_mode(int value,int len);
@@ -41,7 +61,8 @@ int wait_till_mode(int mode, int timeout_ms, bool exit_on_timeout);
 int wait_till_bytes_in_queue(int timeout_ms, bool exit_on_timeout);
 
 void cc1200_tx(char* packet, int len);
-char* cc1200_rx();
+cc1200_pkt_t* cc1200_rx();
 int cc1200_rx_preparar();
+
 
 #endif //CC1200_FUNCTION_H

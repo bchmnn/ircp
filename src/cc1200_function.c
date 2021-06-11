@@ -1,5 +1,26 @@
 #include "cc1200_function.h"
 
+#include "util/log.h"
+
+#define LOGGING_LEVEL TRACE
+#define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+#define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+#define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+#define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+#define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+
+cc1200_pkt_t* malloc_cc1200_pkt(u_int8_t len) {
+	cc1200_pkt_t* pkt = malloc(sizeof(cc1200_pkt_t));
+	pkt->len = len;
+	pkt->pkt = malloc(sizeof(char)*len);
+	return pkt;
+}
+
+void free_cc1200_pkt(cc1200_pkt_t* pkt) {
+	free(pkt->pkt);
+	free(pkt);
+}
+
 int freg_adr [NUM_FREQ_REGS] = {FREQ2,FREQ1, FREQ0,FS_CHP, FS_VCO4,FS_VCO2};
 
 REG_TYPE freq [NUM_FREQ][NUM_FREQ_REGS] = {
@@ -165,10 +186,10 @@ int cc1200_rx_preparar() {
 }
 
 
-char* cc1200_rx() {
+cc1200_pkt_t* cc1200_rx() {
 
-	int cnt = 0;
-	char* buf = malloc(sizeof(char)*(256 + CRC16));
+	cc1200_pkt_t* pkt = NULL;
+	int           cnt = 0;
 
 	int wait = 1000;
 
@@ -179,21 +200,35 @@ char* cc1200_rx() {
 			continue;
 		}
 
-		int pkt_len = cc1200_reg_read(RXFIFO, 0) + CRC16;
+		int pkt_len = cc1200_reg_read(RXFIFO, 0);
+		LTRAC("Received pkt with len: %d\n", pkt_len);
+		pkt = malloc_cc1200_pkt(pkt_len+1);
+
+		char c;
+
 		while (pkt_len) {
-			if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
+			if (!cc1200_reg_read(NUM_RXBYTES, 0))
 				continue;
-			}
-			buf[cnt++] = cc1200_reg_read(RXFIFO, 0);
+
+			c = cc1200_reg_read(RXFIFO, 0);
+			*(pkt->pkt+(cnt++)) = c;
 			pkt_len--;
 		}
-		// TODO crc is truncated. Make struct instead: { msg, crc }
-		buf[cnt-2] = '\0';
+		*(pkt->pkt+cnt) = '\0';
+
+		for (size_t i = 0; i < CRC16; i++) {
+			c = cc1200_reg_read(RXFIFO, 0);
+			*(((char*) &pkt->rssi)+i) = c;
+		}
+
+		LTRAC("Received pkt had RSSI: %d\n", pkt->rssi);
+		LTRAC("Received pkt had link_quality: %d\n", pkt->link_quality);
+		LTRAC("Received pkt had crc_status: %s\n", pkt->crc_status ? "Valid" : "Error");
+
 		break;
 	}
 
-	buf[cnt] = '\0';
-	return buf;
+	return pkt;
 }
 
 void cc1200_tx(char* packet, int len) {

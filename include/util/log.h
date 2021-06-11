@@ -11,6 +11,20 @@
 // set in config.h
 #if GLOBAL_LOGGING_LEVEL
 
+
+/**
+ * Usage:
+ * #include "log.h"
+ * 
+ * #define LOGGING_LEVEL TRACE
+ * #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+ * #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+ * #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+ * #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+ * #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
+ */
+
+
 typedef enum {
         SILENT  = 0,
         ERROR   = 1,

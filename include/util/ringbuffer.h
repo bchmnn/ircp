@@ -21,6 +21,9 @@ typedef struct {
 	rb_strategy strategy;
 } rb_t;
 
+/**
+ * @param len  len including null terminator / 1 if SINGLE_ELEMENT
+ */
 typedef struct {
 	size_t len;
 	void*  elems;
