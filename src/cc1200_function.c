@@ -1,8 +1,16 @@
 #include "cc1200_function.h"
 
-#include "util/log.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <unistd.h>
 
-#define LOGGING_LEVEL TRACE
+#include <external/SPIv1.h>
+
+#include "util/log.h"
+#include "cc1200_reg.h"
+
+#define LOGGING_LEVEL DEBUG
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -124,6 +132,7 @@ int wait_till_mode(int mode, int timeout_ms, bool exit_on_timeout) {
 		waited_us += wait_us;
 		cc1200_cmd(SNOP);
 		curr_mode = get_status_cc1200();
+		LTRAC("CC1200: curr mode: %s\n", get_status_cc1200_str());
 	}
 	return 0;
 }
@@ -185,36 +194,56 @@ int cc1200_rx_preparar() {
 	return cc1200_reg_read(PKT_LEN, 0);
 }
 
-
 cc1200_pkt_t* cc1200_rx() {
 
-	cc1200_pkt_t* pkt = NULL;
-	int           cnt = 0;
-
-	int wait = 1000;
+	// struct timeval start, stop;
+	cc1200_pkt_t*  pkt = NULL;
+	int            cnt = 0;
+	int            wait = 1000;
 
 	while (wait) {
-		if (!cc1200_reg_read(NUM_RXBYTES,0)) {
+		LTRAC("Waiting for pkt\n");
+		if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
 			usleep(10);
 			wait--;
 			continue;
 		}
 
 		int pkt_len = cc1200_reg_read(RXFIFO, 0);
-		LTRAC("Received pkt with len: %d\n", pkt_len);
-		pkt = malloc_cc1200_pkt(pkt_len+1);
+		LTRAC("Receiving pkt with len: %d\n", pkt_len);
 
+		wait = 1000;
+		usleep(10 * pkt_len * 3);
+		while (cc1200_reg_read(NUM_RXBYTES, 0) < pkt_len) {
+			if (!wait) {
+				LWARN("Timeout for pkt\n");
+				return NULL;
+			}
+			usleep(10 * pkt_len * 3);
+			wait--;
+		}
+
+		pkt = malloc_cc1200_pkt(pkt_len+1);
 		char c;
 
 		while (pkt_len) {
-			if (!cc1200_reg_read(NUM_RXBYTES, 0))
-				continue;
-
 			c = cc1200_reg_read(RXFIFO, 0);
 			*(pkt->pkt+(cnt++)) = c;
 			pkt_len--;
 		}
+
 		*(pkt->pkt+cnt) = '\0';
+
+		wait = 100;
+		while (cc1200_reg_read(NUM_RXBYTES, 0) < 2) {
+			if (!wait) {
+				LWARN("Timeout for CRC16\n");
+				free_cc1200_pkt(pkt);
+				return NULL;
+			}
+			usleep(10);
+			wait--;
+		}
 
 		for (size_t i = 0; i < CRC16; i++) {
 			c = cc1200_reg_read(RXFIFO, 0);
@@ -243,4 +272,18 @@ void cc1200_tx(char* packet, int len) {
 	cc1200_cmd(STX);
 
 	wait_till_mode(IDLE, 1000, false);
+}
+
+void cc1200_recover_err() {
+	cc1200_cmd(SNOP);
+	int mode = get_status_cc1200();
+	if (mode == RX_FIFO_ERROR) {
+		LWARN("CC1200: Recovering RX_FIFO_ERROR\n");
+		cc1200_cmd(SFRX);
+		wait_till_mode(IDLE, 1000, false);
+	} else if (mode == TX_FIFO_ERROR) {
+		LWARN("CC1200: Recovering TX_FIFO_ERROR\n");
+		cc1200_cmd(SFTX);
+		wait_till_mode(IDLE, 1000, false);
+	}
 }

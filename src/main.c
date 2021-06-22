@@ -44,7 +44,7 @@ int main (void) {
 	struct sigaction act;
 	act.sa_handler = sigint_handler;
 	sigaction(SIGINT, &act, NULL);
- 
+
 	cc1200_init_reg(RegSettings, ExtRegSettings);
 
 	// initialize thread

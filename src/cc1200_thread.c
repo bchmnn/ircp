@@ -45,13 +45,17 @@ void *cc1200_thread(void* _args) {
 			free(str);
 		}
 		pthread_mutex_unlock(args->buf_mutex);
-		LTRAC("CC1200: Receiving\n");
-		cc1200_pkt_t* pkt = cc1200_rx(cc1200_rx_preparar());
+		LTRAC("CC1200: Preparing for recv\n");
+		cc1200_rx_preparar();
+		LTRAC("CC1200: Starting recv\n");
+		cc1200_pkt_t* pkt = cc1200_rx();
+		LTRAC("CC1200: Stopped recv\n");
 		if (pkt && pkt->len > 0)
 			printf("%s\n", pkt->pkt);
 		if (pkt)
 			free_cc1200_pkt(pkt);
 		usleep(10);
+		cc1200_recover_err();
 	}
 	LDEBG("cc1200_thread received term_signal\n");
 	pthread_exit(0);

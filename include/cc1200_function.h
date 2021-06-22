@@ -1,13 +1,9 @@
 #ifndef CC1200_FUNCTION_H
 #define CC1200_FUNCTION_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <signal.h>
-#include <unistd.h>
 
-#include <external/SPIv1.h>
 #include "cc1200_reg.h"
 
 #define MS_IN_U(ms) (ms * 1000)
@@ -64,5 +60,6 @@ void cc1200_tx(char* packet, int len);
 cc1200_pkt_t* cc1200_rx();
 int cc1200_rx_preparar();
 
+void cc1200_recover_err();
 
 #endif //CC1200_FUNCTION_H
