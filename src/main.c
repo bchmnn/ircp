@@ -33,7 +33,7 @@
 #define BUF_SIZE 2048
 
 #define RX 0
-#define TX (!RX)
+#define TX 1
  
 
 // https://stackoverflow.com/a/37631288/14661040
@@ -119,12 +119,14 @@ void program_rssi(char mode){
 char check_param(char* optarg ){
 	char param = RX; 
 	printf("check_param : input  %s \n", optarg);
-	if (strcasecmp(optarg,"=tx")){
-		param = TX;
-	}
-	if (strcasecmp(optarg,"=rx")){
+	if (strncasecmp(optarg,"=rx",3)== 0){
 		param = RX;
 	}
+
+	if (strncasecmp(optarg,"=tx",3)==0){
+		param = TX;
+	}
+	
 	printf("check_param: param: %d \n" ,param );
 	return param;
 }
