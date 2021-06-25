@@ -118,13 +118,14 @@ void program_rssi(char mode){
 }
 char check_param(char* optarg ){
 	char param = RX; 
-	
-	if (strcasecmp(optarg,"tx")){
+	printf("check_param : input  %s \n", optarg);
+	if (strcasecmp(optarg,"=tx")){
 		param = TX;
 	}
-	if (strcasecmp(optarg,"rx")){
+	if (strcasecmp(optarg,"=rx")){
 		param = RX;
 	}
+	printf("check_param: param: %d \n" ,param );
 	return param;
 }
 
