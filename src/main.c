@@ -42,6 +42,8 @@ volatile sig_atomic_t sigint_received = 0;
 void sigint_handler(int s) {
 	LINFO("Received SIGINT: %d\n", s);
 	sigint_received = 1;
+	cc1200_cmd(SIDLE);
+	spi_shutdown();
 }
 
 void program_chat(){
