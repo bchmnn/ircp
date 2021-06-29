@@ -11,7 +11,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <getopt.h>
-# include <unistd.h>
+#include <unistd.h>
 
 #include <external/SPIv1.h>
 
@@ -46,7 +46,16 @@ void sigint_handler(int s) {
 	spi_shutdown();
 }
 
-void program_chat(){
+void usage() {
+	printf("usage: <program> [OPTION]...\n\n");
+	printf("OPTION\n");
+	printf("-c, --chat       main chat program\n");
+	printf("-i, --interfere  interfere program\n");
+	printf("-r, --rssi=MODE  meassure (MODE=rx) or send (MODE=tx) rssi\n");
+	printf("-h, --help       print this screen");
+}
+
+void program_chat() {
 
 	cc1200_init_reg(RegSettings, ExtRegSettings);
 
@@ -92,38 +101,31 @@ void program_chat(){
 }
 
 
-void program_rssi(char mode){
+void program_rssi(char mode) {
 	cc1200_init_reg(RegSettings_rssi, ExtRegSettings_rssi);
 	//set_preamble(PRAEMBLE_HIGE);
 	//set_symbole_rate(SYMBOLE_RATE_FAST);
 	
 	if (mode == RX){
 		cc1200_cmd(SRX);
-
 		signed char rssi = 0;
 		while (!sigint_received) {
 			rssi = (signed char) cc1200_reg_read(RSSI1, 0);
 			printf("INFO: CC1200: RSSI1: %d\n", (int) rssi);
-			
 			sleep(1);
 		}
-	}else{
-		 cc1200_cmd(STX);
-			sleep(1);
+	} else {
+		cc1200_cmd(STX);
+		sleep(1);
 		while (!sigint_received) {
-			
-        	//sleep(1);
-			//cc1200_cmd(SNOP);
-  			//printf("INFO: Status: %s\n", get_status_cc1200_str());
-
+			// continue
 		}
 	}
-
-		spi_shutdown();
-	
-		return;
+	spi_shutdown();
+	return;
 }
-char check_param(char* optarg ){
+
+char check_param(char* optarg){
 	char param = RX; 
 	printf("check_param : input  %s \n", optarg);
 	if (strncasecmp(optarg,"=rx",3)== 0){
@@ -138,75 +140,61 @@ char check_param(char* optarg ){
 	return param;
 }
 
-void programm_interfier(){}
+void programm_interfere() {
+}
 
 int main (int argc, char **argv) {
-
-
 
 	// prepare sigint_handler
 	struct sigaction act;
 	act.sa_handler = sigint_handler;
 	sigaction(SIGINT, &act, NULL);
 
-	static struct option long_options[] = 
-		{
-			{"rssi",required_argument, 0, 'r' },
-			{"interfere", no_argument, 0 , 'i' },
-			{"chat",no_argument,0,'c'},
-			{"help", no_argument,0, 'h'},
-			{0, 0, 0, 0} 
-		};
-
-	//program_rssi(boolen mode(rx/tx)) 
-	//program_chatt()
-	//programm_interfier()
-	//help
-
-
+	static struct option long_options[] = {
+		{"rssi", required_argument, 0, 'r'},
+		{"interfere", no_argument, 0 , 'i'},
+		{"chat", no_argument, 0, 'c'},
+		{"help", no_argument, 0, 'h'},
+		{0, 0, 0, 0} 
+	};
 	int c;
 
-	while(1){
+	while (true) {
 
-		 /* getopt_long stores the option index here. */
-    	int option_index = 0;
+		/* getopt_long stores the option index here. */
+		int option_index = 0;
 
-    	c = getopt_long (argc, argv, "r:ich",
-                       long_options, &option_index);
-		
-		  /* Detect the end of the options. */
-    	if (c == -1){break;}
-		switch (c)
-		{
-		case 0:
-
-		case 'c' :
-			LINFO("executing chat program\n");
-			program_chat();
-			break;
-		case 'r':
-			LINFO("executing rssi program\n");
-			program_rssi(check_param(optarg));
-			break;
-		
-		case 'i':
-			LINFO("executing interfere program\n");
-			break;
-		
-		case 'h':
-			printf("sage: <program> [OPTION]... OPTION -c, --chat main chat program -i, --interfere interfere program -r, --rssi=MODE meassure (MODE=rx) or send (MODE=tx) rssi -h, --help print this screen \n");
+		c = getopt_long (argc, argv, "r:ich", long_options, &option_index);
+			
+		/* Detect the end of the options. */
+		if (c == -1)
 			break;
 
-		default:
-			LINFO("executing chat program\n");
-			program_chat();
-			break;
+		switch (c) {
+			case 0:
+			case 'c' :
+				LINFO("executing chat program\n");
+				program_chat();
+				break;
+			case 'r':
+				LINFO("executing rssi program\n");
+				program_rssi(check_param(optarg));
+				break;
+			case 'i':
+				LINFO("executing interfere program\n");
+				break;
+			case 'h':
+				usage();
+				break;
+			default:
+				LINFO("executing chat program\n");
+				program_chat();
+				break;
 		}
-        
 	}
 
 
 	spi_shutdown();
 	return 0;
 
-	}
+}
