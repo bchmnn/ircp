@@ -11,7 +11,7 @@
 #define MODE_FIXX_LENGTH               (1 << 3)
 #define MODE_VARIABLE_LENGTH           (1 << 5)
 
-#define PKT_LEN_VARIABLE_MODE  		200
+#define PKT_LEN_VARIABLE_MODE          127
 
 #define SYMBOLE_RATE_SLOW              0b00111111
 #define SYMBOLE_RATE_MIDDLE            0b10001111 

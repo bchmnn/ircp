@@ -165,18 +165,17 @@ void gen_random_massage(char *s, const int len) {
 	s[len] = 0;
 }
 
-void write_tx_fifo(char* data, int len) {
+void write_tx_fifo(char* data, unsigned int len) {
 
 	cc1200_reg_write(TXFIFO , len);
 	data[len] = 0;
-	while (*data != '\0') {
-		int c = *data;
-		cc1200_reg_write(TXFIFO , c);
-		//printf("DEBUG: int: %d , char:  %c \n", c, c);
-		usleep(MS_IN_U(10));
+	for (size_t i = 0; i < len; i++) {
+		printf("writing fifo\n");
+		printf("%c\n", *data);
+		cc1200_reg_write(TXFIFO, *data);
+		usleep(10);
 		data++;
 	}
-
 }
 
 int cc1200_rx_preparar() {
@@ -261,8 +260,8 @@ cc1200_pkt_t* cc1200_rx() {
 }
 
 void cc1200_tx(char* packet, int len) {
-	if (len > 256) {
-		printf("ERROR: packet len max 256: instead %d\n", len);
+	if (len > 127) {
+		printf("ERROR: packet len max 127: instead %d\n", len);
 		return;
 	}
 
