@@ -93,23 +93,28 @@ void program_chat(){
 
 
 void program_rssi(char mode){
-	cc1200_init_reg(RegSettings, ExtRegSettings);
-
+	cc1200_init_reg(RegSettings_rssi, ExtRegSettings_rssi);
+	//set_preamble(PRAEMBLE_HIGE);
+	//set_symbole_rate(SYMBOLE_RATE_FAST);
 	
 	if (mode == RX){
 		cc1200_cmd(SRX);
 
 		signed char rssi = 0;
-		while (true) {
+		while (!sigint_received) {
 			rssi = (signed char) cc1200_reg_read(RSSI1, 0);
 			printf("INFO: CC1200: RSSI1: %d\n", (int) rssi);
 			
 			sleep(1);
 		}
 	}else{
-		cc1200_cmd(STX);
-		while (true) {
+		 cc1200_cmd(STX);
 			sleep(1);
+		while (!sigint_received) {
+			
+        	//sleep(1);
+			//cc1200_cmd(SNOP);
+  			//printf("INFO: Status: %s\n", get_status_cc1200_str());
 
 		}
 	}
