@@ -116,6 +116,7 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 
 	while (!abort(abort_args)) {
 		LTRAC("Sending HANDSHAKE\n");
+		// TODO somehow get length of pkt_tx from generate_str (struct maybe)
 		pkt_tx = generate_str(HANDSHAKE, NULL, 0);
 		cc1200_tx(pkt_tx, 5);
 		free(pkt_tx);
