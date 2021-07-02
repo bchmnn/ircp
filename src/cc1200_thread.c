@@ -7,9 +7,11 @@
 #include <unistd.h> // usleep
 #include <pthread.h>
 
-#include "util/ringbuffer.h"
 #include "cc1200_function.h"
+#include "prot.h"
+#include "util/crypto.h"
 #include "util/log.h"
+#include "util/ringbuffer.h"
 
 #define LOGGING_LEVEL DEBUG
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -35,6 +37,12 @@ bool get_term_signal(cc1200_thread_args_t* args) {
 void *cc1200_thread(void* _args) {
 	LDEBG("Starting cc1200_thread\n");
 	cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
+
+	session_t* session = malloc(sizeof(session_t));
+	handshake(session, (bool(*)(void*)) &get_term_signal, _args);
+	print_session(session);
+
+
 	while (!get_term_signal(args)) {
 		pthread_mutex_lock(args->buf_mutex);
 		while (!rb_empty(args->buf)) {
@@ -48,7 +56,7 @@ void *cc1200_thread(void* _args) {
 		LTRAC("CC1200: Preparing for recv\n");
 		cc1200_rx_preparar();
 		LTRAC("CC1200: Starting recv\n");
-		cc1200_pkt_t* pkt = cc1200_rx();
+		cc1200_pkt_t* pkt = cc1200_rx(100);
 		LTRAC("CC1200: Stopped recv\n");
 		if (pkt && pkt->len > 0)
 			printf("%s\n", pkt->pkt);

@@ -35,6 +35,7 @@ typedef struct {
 
 /**
  * Allocates memory for cc1200_pkt_t
+ * NOTE!: allocates len+1 for potential null terminator
  * @param len  len of underlying char* pkt to allocate
  */
 cc1200_pkt_t* malloc_cc1200_pkt(u_int8_t len);
@@ -57,7 +58,7 @@ int wait_till_mode(int mode, int timeout_ms, bool exit_on_timeout);
 int wait_till_bytes_in_queue(int timeout_ms, bool exit_on_timeout);
 
 void cc1200_tx(char* packet, int len);
-cc1200_pkt_t* cc1200_rx();
+cc1200_pkt_t* cc1200_rx(size_t timeout);
 int cc1200_rx_preparar();
 
 void cc1200_recover_err();

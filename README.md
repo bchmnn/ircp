@@ -68,32 +68,33 @@ Actors:
   3 - interrupter
 ---------------------------------------------
 Stages:
-  1 - Handshake
-  2 - Chatting
-  3 - Interrupted
-  4 - After switch
+  1 - HANDSHAKE (CONNECT)
+  2 - CHAT
+  3 - INTERRUPTED
+  4 - RECONNECT
 ---------------------------------------------
 Message:
   - max size: 255 bytes
   - format: <len><type:uint8><msg><checksum>
+  - checksum for type+msg
   - types:
-    - 1: handshake
-    - 2: handshake-ack: <msg> = rssi
-    - 3: chat: <msg> = text
-    - 4: chat-ack
-    - 5: i'm here
-    - 6: i'm here-ack: <msg> = rssi
-    - 7: ciao!
+    - 0: handshake
+    - 1: handshake-ack: <msg> = rssi
+    - 2: chat: <msg> = text
+    - 3: chat-ack
+    - 4: i'm here
+    - 5: i'm here-ack: <msg> = rssi
+    - 6: ciao!
 ==================Protocol===================
-1. Handshake
+1. HANDSHAKE (CONNECT)
   - predefined meeting frequency: 920 hz
   - 1 and 2 handshake:
     - 2 answers with RSSI (Ack)
     - RSSI in Ack is used as SEED
     - (opt: keep key exchange in ming for crypto)
-2. Chatting
+2. CHAT
   - tbd
-3. Interrupted
+3. INTERRUPTED
   - 1/2 meassure high CRC and low RSSI
     - channel is corrupt
     - reduce symbol rate
@@ -102,7 +103,7 @@ Message:
   - 1/2 meassure high RSSI
     - possibility of 3 - interrupter
     - switch frequency acording to SEED
-4. After switch
+4. RECONNECT
   - 1 loops: send "i'm here", listen for ACK
     -> 1 goes into chatting listen mode
   - 2 loop: listen "i'm here" -> on receive: send ACK

@@ -20,7 +20,7 @@
 cc1200_pkt_t* malloc_cc1200_pkt(u_int8_t len) {
 	cc1200_pkt_t* pkt = malloc(sizeof(cc1200_pkt_t));
 	pkt->len = len;
-	pkt->pkt = malloc(sizeof(char)*len);
+	pkt->pkt = malloc(sizeof(char)*(len+1));
 	return pkt;
 }
 
@@ -168,10 +168,7 @@ void gen_random_massage(char *s, const int len) {
 void write_tx_fifo(char* data, unsigned int len) {
 
 	cc1200_reg_write(TXFIFO , len);
-	data[len] = 0;
 	for (size_t i = 0; i < len; i++) {
-		printf("writing fifo\n");
-		printf("%c\n", *data);
 		cc1200_reg_write(TXFIFO, *data);
 		usleep(10);
 		data++;
@@ -180,25 +177,24 @@ void write_tx_fifo(char* data, unsigned int len) {
 
 int cc1200_rx_preparar() {
 
+	// TODO set CRC RSSI meassure to average instead of first
+
 	set_mode(MODE_VARIABLE_LENGTH, PKT_LEN_VARIABLE_MODE);
 
-	// printf("INFO: Putting into receive mode...\n");
-	// receive mode
 	cc1200_cmd(SRX);
 	wait_till_mode(RX, 1000, false);
 
 	cc1200_cmd(SNOP);
-	// printf("INFO: Status: %s\n", get_status_cc1200_str());
 	
 	return cc1200_reg_read(PKT_LEN, 0);
 }
 
-cc1200_pkt_t* cc1200_rx() {
+cc1200_pkt_t* cc1200_rx(size_t timeout) {
 
 	// struct timeval start, stop;
 	cc1200_pkt_t*  pkt = NULL;
 	int            cnt = 0;
-	int            wait = 1000;
+	int            wait = timeout ? timeout : 100;
 
 	while (wait) {
 		LTRAC("Waiting for pkt\n");
@@ -211,7 +207,7 @@ cc1200_pkt_t* cc1200_rx() {
 		int pkt_len = cc1200_reg_read(RXFIFO, 0);
 		LTRAC("Receiving pkt with len: %d\n", pkt_len);
 
-		wait = 1000;
+		wait = 100;
 		usleep(10 * pkt_len * 3);
 		while (cc1200_reg_read(NUM_RXBYTES, 0) < pkt_len) {
 			if (!wait) {
@@ -222,7 +218,7 @@ cc1200_pkt_t* cc1200_rx() {
 			wait--;
 		}
 
-		pkt = malloc_cc1200_pkt(pkt_len+1);
+		pkt = malloc_cc1200_pkt(pkt_len);
 		char c;
 
 		while (pkt_len) {

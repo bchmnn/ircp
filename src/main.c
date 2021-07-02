@@ -42,8 +42,6 @@ volatile sig_atomic_t sigint_received = 0;
 void sigint_handler(int s) {
 	LINFO("Received SIGINT: %d\n", s);
 	sigint_received = 1;
-	cc1200_cmd(SIDLE);
-	spi_shutdown();
 }
 
 void usage() {
@@ -92,8 +90,10 @@ void program_chat() {
 	}
 
 	set_term_signal(&thread_args);
+	LDEBG("Waiting for thread to terminate\n");
 	pthread_join(thread, 0);
 	rb_free(buf);
+	cc1200_cmd(SIDLE);
 	spi_shutdown();
 
 	return ;
@@ -121,18 +121,19 @@ void program_rssi(char mode) {
 			// continue
 		}
 	}
+	cc1200_cmd(SIDLE);
 	spi_shutdown();
 	return;
 }
 
-char check_param(char* optarg){
+char check_param(char* optarg) {
 	char param = RX; 
 	printf("check_param : input  %s \n", optarg);
-	if (strncasecmp(optarg,"=rx",3)== 0){
+	if (strncasecmp(optarg,"rx", 2) == 0){
 		param = RX;
 	}
 
-	if (strncasecmp(optarg,"=tx",3)==0){
+	if (strncasecmp(optarg,"tx", 2) == 0){
 		param = TX;
 	}
 	
@@ -163,7 +164,6 @@ int main (int argc, char **argv) {
 
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-
 		c = getopt_long (argc, argv, "r:ich", long_options, &option_index);
 			
 		/* Detect the end of the options. */
@@ -194,7 +194,6 @@ int main (int argc, char **argv) {
 	}
 
 
-	spi_shutdown();
 	return 0;
 
 }
