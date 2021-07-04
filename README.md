@@ -81,7 +81,7 @@ Message:
     - 0: handshake
     - 1: handshake-ack: <msg> = rssi
     - 2: chat: <msg> = text
-    - 3: chat-ack
+    - 3: chat-ack:  <msg> = <chat-checksum +1>
     - 4: i'm here
     - 5: i'm here-ack: <msg> = rssi
     - 6: ciao!
@@ -93,7 +93,22 @@ Message:
     - RSSI in Ack is used as SEED
     - (opt: keep key exchange in ming for crypto)
 2. CHAT
-  - tbd
+  - receive message:
+     
+    - Check Message: 
+      - if rssi >> average rssi (SEED) than swtich stage to INTERRUPTED
+      - else if Message == <ciao> than swtich stage to DISCONNECT
+      - else  store Message in buffer transmist chat-ack
+    - switch to Transmit
+  - transmit massage:
+      - check if Massage to transmiting
+        
+        - send Massage: 
+          - wait for massage ack
+            - if timeout than Send Massage again or check Rssi
+            - else do stuff,(Ciao or interrupt )
+      - switch to receive message 
+  - 
 3. INTERRUPTED
   - 1/2 meassure high CRC and low RSSI
     - channel is corrupt
@@ -109,6 +124,10 @@ Message:
   - 2 loop: listen "i'm here" -> on receive: send ACK
     -> 2 goes into chatting listen mode
     -> if recv "i'm here" -> resend ACK
+5. DISCONNECT
+  - free buffer 
+  - preparation for new connection request  
+  - switch to handshake mode 
 ```
 ### Notes
 * google for: packet discrimination / ursache paket fehler
