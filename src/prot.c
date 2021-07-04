@@ -17,6 +17,17 @@
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
+void free_message(message_t* message) {
+	if (!message) return;
+	if (message->msg) free(message->msg);
+	free(message);
+}
+
+void free_mstring(mstring_t* mstring) {
+	if (!mstring) return;
+	if (mstring->str) free(mstring->str);
+	free(mstring);
+}
 
 const char* stages_str(stages_t stage) {
 	switch (stage) {
@@ -40,7 +51,7 @@ void print_session(session_t* session) {
 	printf("session: {\n");
 	printf("    stage: %s\n", stages_str(session->stage));
 	printf("    client_mode: %s\n", client_mode_str(session->client_mode));
-	printf("    partner_rssi: %d\n", (int32_t) session->partner_rssi);
+	printf("    rssi_seed: %d\n", (int32_t) session->rssi_seed);
 	printf("}\n");
 }
 
@@ -68,6 +79,8 @@ message_t* parse_message(u_int32_t len, char* str) {
 	if (len > 5) {
 		msg->msg = malloc(sizeof(char) * (len - 5));
 		memcpy(msg->msg, (str + 1), len - 5);
+	} else {
+		msg->msg = NULL;
 	}
 
 	msg->msg_len = len - 5;
@@ -78,7 +91,7 @@ message_t* parse_message(u_int32_t len, char* str) {
 
 }
 
-char* generate_str(message_type_t type, char* body, size_t len) {
+mstring_t* message_str(message_type_t type, char* body, size_t len) {
 
 	if (type >= MESSAGE_TYPE_MAX) {
 		LDEBG("Invalid type\n");
@@ -90,19 +103,21 @@ char* generate_str(message_type_t type, char* body, size_t len) {
 		return NULL;
 	}
 
-	char* str = malloc(sizeof(char) * (len + 6));
+	mstring_t* mstring = malloc(sizeof(mstring_t));
+	mstring->str = malloc(sizeof(char) * (len + 6));
 
-	str[0] = (u_int8_t) type;
-	if (len)
-		memcpy((str + 1), body, len);
+	mstring->str[0] = (u_int8_t) type;
 
-	u_int32_t crc = crc32(str, len + 1);
+	if (len) memcpy((mstring->str + 1), body, len);
 
-	memcpy((str + len + 1), (char*) &crc, 4);
+	u_int32_t crc = crc32(mstring->str, len + 1);
+	memcpy((mstring->str + len + 1), (char*) &crc, 4);
 
-	str[len + 5] = '\0';
+	mstring->str[len + 5] = '\0';
 
-	return str;
+	mstring->len = len + 5;
+
+	return mstring;
 }
 
 
@@ -111,15 +126,13 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 	session->stage = CONNECT;
 	srandom(time(NULL));
 
-	char*   pkt_tx = NULL;
-	// size_t  len;
+	mstring_t* pkt_tx = NULL;
 
 	while (!abort(abort_args)) {
 		LTRAC("Sending HANDSHAKE\n");
-		// TODO somehow get length of pkt_tx from generate_str (struct maybe)
-		pkt_tx = generate_str(HANDSHAKE, NULL, 0);
-		cc1200_tx(pkt_tx, 5);
-		free(pkt_tx);
+		pkt_tx = message_str(HANDSHAKE, NULL, 0);
+		cc1200_tx(pkt_tx->str, pkt_tx->len);
+		free_mstring(pkt_tx);
 
 		cc1200_rx_preparar();
 		LTRAC("Receiving HANDSHAKE response\n");
@@ -133,20 +146,21 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 				LDEBG("Received HANDSHAKE_ACK\n");
 				LDEBG("Meassured RSSI was: %d\n", (int32_t) pkt_rx->rssi);
 				// TODO compare msg rssi with meassured rssi
-				session->partner_rssi = (int8_t) *msg->msg;
+				session->rssi_seed = (int8_t) *msg->msg;
 				session->client_mode = MASTER;
 			} else if (msg->type == HANDSHAKE) {
 				LDEBG("Received HANDSHAKE\n");
-				pkt_tx = generate_str(
+				pkt_tx = message_str(
 						HANDSHAKE_ACK,
 						(char*) &pkt_rx->rssi,
 						1
 				);
-				cc1200_tx(pkt_tx, 6);
-				free(pkt_tx);
-				session->partner_rssi = pkt_rx->rssi;
+				cc1200_tx(pkt_tx->str, pkt_tx->len);
+				free_mstring(pkt_tx);
+				session->rssi_seed = pkt_rx->rssi;
 				session->client_mode = SERVANT;
 			}
+			free_message(msg);
 			free_cc1200_pkt(pkt_rx);
 			session->stage = CHATTING;
 			return 0;

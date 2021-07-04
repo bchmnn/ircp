@@ -205,7 +205,7 @@ cc1200_pkt_t* cc1200_rx(size_t timeout) {
 		}
 
 		int pkt_len = cc1200_reg_read(RXFIFO, 0);
-		LTRAC("Receiving pkt with len: %d\n", pkt_len);
+		LDEBG("Receiving pkt with len: %d\n", pkt_len);
 
 		wait = 100;
 		usleep(10 * pkt_len * 3);
@@ -245,9 +245,11 @@ cc1200_pkt_t* cc1200_rx(size_t timeout) {
 			*(((char*) &pkt->rssi)+i) = c;
 		}
 
-		LTRAC("Received pkt had RSSI: %d\n", pkt->rssi);
-		LTRAC("Received pkt had link_quality: %d\n", pkt->link_quality);
-		LTRAC("Received pkt had crc_status: %s\n", pkt->crc_status ? "Valid" : "Error");
+		LDEBG("Received pkt: CRC16: { rssi: %d, link_quality: %d, crc_status: %s }\n",
+			pkt->rssi,
+			pkt->link_quality,
+			pkt->crc_status ? "\"valid\"" : "\"error\""
+		);
 
 		break;
 	}

@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 typedef enum {
 	CONNECT,
@@ -27,8 +28,12 @@ typedef enum {
 typedef struct {
 	stages_t       stage;
 	client_mode_t  client_mode;
-	int8_t         partner_rssi;
-	// curr_freq
+	size_t         num_pkt_recv;
+	size_t         num_pkt_send;
+	int8_t         rssi_avg;
+	int8_t         rssi_seed;
+	float          curr_freq;
+	time_t         t_start;
 } session_t;
 
 typedef enum {
@@ -48,6 +53,15 @@ typedef struct {
 	char*          msg;
 	u_int32_t      crc32;
 } message_t;
+
+typedef struct {
+	size_t len;
+	char* str;
+} mstring_t; // stands for message string
+
+void free_message(message_t* message);
+
+void free_mstring(mstring_t* mstring);
 
 const char* stages_str(stages_t stage);
 
@@ -71,9 +85,9 @@ message_t* parse_message(u_int32_t len, char* str);
  * @param type  type byte to prepend
  * @param body  message to parse
  * @param len   len of message
- * @return      null terminated string
+ * @return      mstring_t pointer or NULL on err
  */
-char* generate_str(message_type_t type, char* body, size_t len);
+mstring_t* message_str(message_type_t type, char* body, size_t len);
 
 /**
  * Tries to handshake (refere to protocol).
