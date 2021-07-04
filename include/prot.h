@@ -11,6 +11,14 @@ typedef enum {
 	RECONNECT
 } stages_t;
 
+typedef enum{
+	mutex_lock = 0,
+	mutex_unlock = 1,
+	pthread_max
+
+	
+}pthread_fun;
+
 typedef enum {
 	MASTER,
 	SERVANT

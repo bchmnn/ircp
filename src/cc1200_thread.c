@@ -20,6 +20,14 @@
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
+
+typedef void* (*func_ptr)(void *);
+func_ptr (pthread) [pthread_max] (pthread_mutex_t *__mutex)={
+	(pthread_mutex_lock) ,
+	(pthread_mutex_unlock) 
+}; 
+
+
 void set_term_signal(cc1200_thread_args_t* args) {
 	pthread_mutex_lock(args->term_signal_mutex);
 	*args->term_signal = true;
