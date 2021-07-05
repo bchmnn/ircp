@@ -25,6 +25,7 @@
 #define NUM_FREQ_REGS 6
 #define CRC16 2
 
+
 typedef struct {
 	u_int8_t len;
 	char* pkt;

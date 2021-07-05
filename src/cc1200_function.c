@@ -31,24 +31,6 @@ void free_cc1200_pkt(cc1200_pkt_t* pkt) {
 
 int freg_adr [NUM_FREQ_REGS] = {FREQ2,FREQ1, FREQ0,FS_CHP, FS_VCO4,FS_VCO2};
 
-REG_TYPE freq [NUM_FREQ][NUM_FREQ_REGS] = {
-	{
-		{ FREQ2,   0x5b },
-		{ FREQ1,   0x80 },
-		{ FREQ0,   0x00 },
-		{ FS_CHP,  0x2a },
-		{ FS_VCO4, 0x11 },
-		{ FS_VCO2, 0x64 }
-	}, {
-		{ FREQ2,   0x56 },
-		{ FREQ1,   0xcc },
-		{ FREQ0,   0xcc },
-		{ FS_CHP,  0x2b },
-		{ FS_VCO4, 0x11 },
-		{ FS_VCO2, 0x4c }
-	}
-};
-
 int cc1200_init() {
 	// first initialize
 	printf("INFO: Initializing SPI\n");
