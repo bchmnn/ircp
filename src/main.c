@@ -15,9 +15,11 @@
 
 #include <external/SPIv1.h>
 
-#include "cc1200_reg.h"
-#include "cc1200_preinit.h"
-#include "cc1200_function.h"
+#include "cc1200/config.h"
+#include "cc1200/control.h"
+#include "cc1200/utils.h"
+#include "cc1200/freq.h"
+
 #include "cc1200_thread.h"
 #include "util/ringbuffer.h"
 #include "util/readline.h"
@@ -34,7 +36,6 @@
 
 #define RX 0
 #define TX 1
- 
 
 // https://stackoverflow.com/a/37631288/14661040
 volatile sig_atomic_t sigint_received = 0;
@@ -55,7 +56,22 @@ void usage() {
 
 void program_chat() {
 
-	cc1200_init_reg(RegSettings, ExtRegSettings);
+	if (spi_init()) {
+		LERR("Initialization failed\n");
+		return;
+	}
+	cc1200_cmd(SRES);
+	if (cc1200_wait_till_mode(IDLE, 1000)) {
+		LERR("Reset timed out\n");
+		return;
+	}
+	cc1200_regs_write(CC1200_BASE_CONFIG, CC1200_NUM_REGS);
+
+	cc1200_set_packet_mode(VAR_LENGTH, 127);
+	if (cc1200_set_freq(915100)) {
+		LERR("Could not set frequency\n");
+		return;
+	}
 
 	// initialize thread
 	rb_t* buf = rb_init(BUF_SIZE, char, NULL_TERMINATED);
@@ -100,13 +116,21 @@ void program_chat() {
 
 }
 
-
 void program_rssi(char mode) {
-	cc1200_init_reg(RegSettings_rssi, ExtRegSettings_rssi);
-	//set_preamble(PRAEMBLE_HIGE);
-	//set_symbole_rate(SYMBOLE_RATE_FAST);
-	
-	if (mode == RX){
+
+	if (spi_init()) {
+		LERR("Initialization failed\n");
+		return;
+	}
+	cc1200_cmd(SRES);
+	if (cc1200_wait_till_mode(IDLE, 1000)) {
+		LERR("Reset timed out\n");
+		return;
+	}
+	cc1200_regs_write(CC1200_BASE_CONFIG_RSSI, CC1200_NUM_REGS);
+	cc1200_set_freq(915100);
+
+	if (mode == RX) {
 		cc1200_cmd(SRX);
 		signed char rssi = 0;
 		while (!sigint_received) {
@@ -192,7 +216,6 @@ int main (int argc, char **argv) {
 				break;
 		}
 	}
-
 
 	return 0;
 

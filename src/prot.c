@@ -7,10 +7,10 @@
 #include <time.h>
 #include <unistd.h> // usleep
 
+#include "cc1200/utils.h"
 #include "util/crypto.h"
 #include "util/log.h"
 #include "util/ringbuffer.h"
-#include "cc1200_function.h"
 
 #define LOGGING_LEVEL DEBUG
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -136,7 +136,6 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 		cc1200_tx(pkt_tx->str, pkt_tx->len);
 		free_mstring(pkt_tx);
 
-		cc1200_rx_preparar();
 		LTRAC("Receiving HANDSHAKE response\n");
 		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10);
 		if (pkt_rx && pkt_rx->len > 0) {
@@ -174,26 +173,24 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 }
 
 
-int32_t chat(session_t* session, func_ptr (*pthread), void* abort_args ){
-	if (session->stage == CHATTING ){
-				while (!pthread[term_signal](abort_args)) {
-					pthread[tx_from_buffer](abort_args);
-					LTRAC("CC1200: Preparing for recv\n");
-					cc1200_rx_preparar();
-					LTRAC("CC1200: Starting recv\n");
-					cc1200_pkt_t* pkt = cc1200_rx(100);
-					LTRAC("CC1200: Stopped recv\n");
-					if (pkt && pkt->len > 0)
-						printf("%s\n", pkt->pkt);
-					if (pkt)
-					free_cc1200_pkt(pkt);
-					usleep(10);
-					cc1200_recover_err();
-				}
-				LDEBG("cc1200_thread received term_signal\n");
-				//pthread[p_exit](0);
-			}
-	
-	
+int32_t chat(session_t* session, func_ptr (*pthread), void* abort_args) {
+
+	if (session->stage == CHATTING) {
+		while (!pthread[term_signal](abort_args)) {
+			pthread[tx_from_buffer](abort_args);
+			LTRAC("CC1200: Starting recv\n");
+			cc1200_pkt_t* pkt = cc1200_rx(100);
+			LTRAC("CC1200: Stopped recv\n");
+			if (pkt && pkt->len > 0)
+				printf("%s\n", pkt->pkt);
+			if (pkt)
+				free_cc1200_pkt(pkt);
+			usleep(10);
+			cc1200_recover_err();
+		}
+		LDEBG("cc1200_thread received term_signal\n");
+	}
+
 	return 0;
+
 }
