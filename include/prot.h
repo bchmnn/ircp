@@ -12,6 +12,20 @@ typedef enum {
 	RECONNECT
 } stages_t;
 
+typedef enum{
+	mutex_lock 		= 0,
+	mutex_unlock 	= 1,
+	p_exit 			= 2,
+	term_signal		= 3,
+	tx_from_buffer	= 4,
+	pthread_max
+
+	
+}pthread_fun;
+
+typedef bool (*func_ptr)(void* args);
+
+
 typedef enum {
 	MASTER,
 	SERVANT
@@ -89,5 +103,5 @@ mstring_t* message_str(message_type_t type, char* body, size_t len);
  * @return  > 0 on error
  */
 int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args);
-
+int32_t chat(session_t* session, func_ptr (*pthread), void* abort_args );
 #endif //PROT_H
