@@ -76,19 +76,32 @@ func_ptr pthread [pthread_max]={
 void *cc1200_thread(void* _args) {
 	LDEBG("Starting cc1200_thread\n");
 	cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
-	
-	while (!get_term_signal(args))
-	{
-	printf("foobar\n");
 	session_t* session = malloc(sizeof(session_t));
-	handshake(session,(bool(*)(void*)) &get_term_signal , _args);
-	print_session(session);
+	session->stage = CONNECT;
 	
-
-	chat(session, (bool(*)(void*)) &get_term_signal, (char*(*)(void*)) &read_from_ringbuffer, _args);
-	
+	while (!get_term_signal(args)) {
+		switch (session->stage) {
+		case CONNECT:
+			handshake(session,(bool(*)(void*)) &get_term_signal , _args);
+			print_session(session);
+			break;
+		case CHATTING:
+			chat(session,
+				(bool(*)(void*)) &get_term_signal,
+				(char*(*)(void*)) &read_from_ringbuffer,
+				_args
+			);
+			break;
+		case INTERRUPTED:
+			LERR("Not implemented\n");
+			break;
+		case RECONNECT:
+			LERR("Not implemented\n");
+			break;
+		default:
+			LERR("This should not happen\n");
+			break;
+		}
 	}
-	
-	
 	pthread_exit(0);
 }
