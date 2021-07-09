@@ -23,5 +23,5 @@ typedef struct {
 void set_term_signal(cc1200_thread_args_t* args);
 
 void *cc1200_thread(void* _args);
-
+char* read_from_ringbuffer(void* _args);
 #endif //CC1200_THREAD_H

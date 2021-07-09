@@ -12,6 +12,10 @@
 #include "util/log.h"
 #include "util/ringbuffer.h"
 
+
+
+#include "config.h"
+
 #define LOGGING_LEVEL DEBUG
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -81,6 +85,7 @@ message_t* parse_message(u_int32_t len, char* str) {
 	if (len > 5) {
 		msg->msg = malloc(sizeof(char) * (len - 5));
 		memcpy(msg->msg, (str + 1), len - 5);
+		msg->msg[len - 5] ='\0';
 	} else {
 		msg->msg = NULL;
 	}
@@ -125,7 +130,7 @@ mstring_t* message_str(message_type_t type, char* body, size_t len) {
 
 int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 
-	session->stage = CONNECT;
+	reset_sesson(session);
 	srandom(time(NULL));
 
 	mstring_t* pkt_tx = NULL;
@@ -142,6 +147,7 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 			message_t* msg = parse_message(pkt_rx->len, pkt_rx->pkt);
 			if (!msg) {
 				LDEBG("Received invalid msg\n");
+				free_cc1200_pkt(pkt_rx);
 				continue;
 			} else if (msg->type == HANDSHAKE_ACK && msg->msg_len == 1) {
 				LDEBG("Received HANDSHAKE_ACK\n");
@@ -173,23 +179,89 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 }
 
 
-int32_t chat(session_t* session, func_ptr (*pthread), void* abort_args) {
+int32_t chat(session_t* session, bool(*abort)(void*), char*(read_buffer)(void*), void* func_args) {
+	
+	mstring_t* pkt_tx = NULL;
 
-	if (session->stage == CHATTING) {
-		while (!pthread[term_signal](abort_args)) {
-			pthread[tx_from_buffer](abort_args);
-			LTRAC("CC1200: Starting recv\n");
-			cc1200_pkt_t* pkt = cc1200_rx(100);
-			LTRAC("CC1200: Stopped recv\n");
-			if (pkt && pkt->len > 0)
-				printf("%s\n", pkt->pkt);
-			if (pkt)
-				free_cc1200_pkt(pkt);
-			usleep(10);
-			cc1200_recover_err();
+	while (!abort(func_args)) {
+
+		char* str = read_buffer(func_args);
+		if(str) {
+			LTRAC("[CHAT]CC1200: Starting trans \n");
+			size_t len = strlen(str);
+			pkt_tx = message_str(CHAT,str,len);
+			cc1200_tx(pkt_tx->str, pkt_tx->len);	
+			free_mstring(pkt_tx);
+			free(str);
+			LTRAC("[CHAT]CC1200: Stopped trans\n");
 		}
-		LDEBG("cc1200_thread received term_signal\n");
+		LTRAC("[CHAT]CC1200: Starting recv\n");
+		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10); //100
+		LTRAC("[CHAT]CC1200: Stopped recv\n");
+		if (pkt_rx && pkt_rx->len > 0) {			
+			message_t* msg = parse_message(pkt_rx->len, pkt_rx->pkt);
+			if (!msg) {
+				if(msg->msg) printf("%s\n",msg->msg);
+				LDEBG("Received invalid msg\n");
+				free_cc1200_pkt(pkt_rx);
+				continue;
+			}
+			
+			// int8_t rssi = pkt_rx->rssi;
+			// if(rssi > session->rssi_avg- RSSI_TOLERANCE || rssi < session->rssi_avg + RSSI_TOLERANCE ){
+			// 	printf("Interupted\n");
+			// 	LTRAC("Receiving CHAT INTERRUPTED\n");
+			// 	session->stage = INTERRUPTED;
+			// 	free_message(msg);
+			// 	free_cc1200_pkt(pkt_rx);
+			// 	return 0;
+			// }
+			if (msg->type == HANDSHAKE || msg->type == CIAO)  {
+				printf("Handshake\n");
+				LTRAC("Receiving CHAT Handshake or ciao\n");
+				update_rssi_avg(session, pkt_rx->rssi );
+				session->stage = CONNECT;
+				free_message(msg);
+				free_cc1200_pkt(pkt_rx);
+				return 0;
+
+			}
+			else if (msg->type == CHAT_ACK && msg->msg_len == 1) {
+				LTRAC("Receiving CHAT_ACK\n");
+				update_rssi_avg(session, pkt_rx->rssi );
+				
+
+
+			}else if (msg->type == CHAT) {
+				LTRAC("Receiving CHAT \n");
+				if(msg->msg) { printf("%s\n",msg->msg); }
+				printf("1test\n");
+				update_rssi_avg(session, pkt_rx->rssi );
+				printf("2test\n");
+				pkt_tx = message_str(CHAT_ACK,(char*) &pkt_rx->rssi,1);
+				printf("3test\n");
+				cc1200_tx(pkt_tx->str, pkt_tx->len);
+				printf("4test\n");
+				free_mstring(pkt_tx);
+				printf("5test\n");	
+			}
+
+			free_message(msg);
+			printf("test1\n");
+			free_cc1200_pkt(pkt_rx);
+			printf("test2\n");
+			cc1200_recover_err();
+			printf("test3\n");
+			
+			
+		}
+	
+
 	}
+	pkt_tx = message_str(CIAO,NULL,0);
+	reset_sesson(session);
+	cc1200_tx(pkt_tx->str, pkt_tx->len);	
+	free_mstring(pkt_tx);
 
 	return 0;
 

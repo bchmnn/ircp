@@ -81,7 +81,7 @@ Message:
     - 0: handshake
     - 1: handshake-ack: <msg> = rssi
     - 2: chat: <msg> = text
-    - 3: chat-ack:  <msg> = <chat-checksum +1>
+    - 3: chat-ack:  <msg> = rssi 
     - 4: i'm here
     - 5: i'm here-ack: <msg> = rssi
     - 6: ciao!

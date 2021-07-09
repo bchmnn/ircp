@@ -8,4 +8,6 @@
 #define FREQ_MIN 820
 #define FREQ_MAX 950
 
+#define RSSI_TOLERANCE 6
+
 #endif //CONFIG_H

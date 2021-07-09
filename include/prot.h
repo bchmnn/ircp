@@ -75,6 +75,22 @@ const char* client_mode_str(client_mode_t client_mode);
 
 void print_session(session_t* session);
 
+inline void update_rssi_avg(session_t* session, int8_t rssi ){
+	int8_t rssi_avg = session->rssi_avg;
+	rssi_avg = (rssi_avg + rssi) / 2;
+	session->rssi_avg  = rssi_avg;
+	session->num_pkt_recv++;
+}
+
+inline void reset_sesson(session_t* session){
+	session->stage = CONNECT;
+	session->rssi_avg = 0;
+	session->num_pkt_recv=0;
+	session->num_pkt_send=0;
+	session->rssi_seed = 0;
+	session->client_mode=0;
+}
+
 /**
  * Checks if str is at least 5 bytes.
  * Checks if type is valid.
@@ -103,5 +119,5 @@ mstring_t* message_str(message_type_t type, char* body, size_t len);
  * @return  > 0 on error
  */
 int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args);
-int32_t chat(session_t* session, func_ptr (*pthread), void* abort_args );
+int32_t chat(session_t* session, bool(*abort)(void*), char*(buffer)(void*), void* func_args);
 #endif //PROT_H

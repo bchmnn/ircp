@@ -53,18 +53,16 @@ bool get_pthread_exit(){
 	return 0;
 }
 
-bool get_read_from_ringbuffer(void* _args){
+char* read_from_ringbuffer(void* _args){
+	char* str = NULL;
 	cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
 	pthread_mutex_lock(args->term_signal_mutex);
-	while (!rb_empty(args->buf)) {
+	if(!rb_empty(args->buf)) {
 		LTRAC("Ringbuffer not empty\n");
-		char* str = rb_pop_str(args->buf);
-		size_t len = strlen(str);
-		cc1200_tx(str, len);
-		free(str);
+		str = rb_pop_str(args->buf);
 	}
 	pthread_mutex_unlock(args->term_signal_mutex);
-	return 0;
+	return str;
 }
 
 func_ptr pthread [pthread_max]={
@@ -72,18 +70,25 @@ func_ptr pthread [pthread_max]={
 	get_pthread_mutex_unlock,
 	get_pthread_exit,
 	get_term_signal,
-	get_read_from_ringbuffer
+	//read_from_ringbuffer
 };
 
 void *cc1200_thread(void* _args) {
 	LDEBG("Starting cc1200_thread\n");
-	//cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
-
+	cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
+	
+	while (!get_term_signal(args))
+	{
+	printf("foobar\n");
 	session_t* session = malloc(sizeof(session_t));
-	handshake(session, (bool(*)(void*)) &get_term_signal, _args);
+	handshake(session,(bool(*)(void*)) &get_term_signal , _args);
 	print_session(session);
+	
 
-	chat(session, pthread, _args);
-
+	chat(session, (bool(*)(void*)) &get_term_signal, (char*(*)(void*)) &read_from_ringbuffer, _args);
+	
+	}
+	
+	
 	pthread_exit(0);
 }

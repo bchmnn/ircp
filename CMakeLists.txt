@@ -9,7 +9,7 @@ set (CMAKE_C_STANDARD_REQUIRED ON)
 
 set (CMAKE_CROSS_COMPILING TRUE)
 
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-a8 -O2 -Wall -Wextra -Werror")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-a8 -O2 -Wall -Wextra -Werror ")
 set (CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath=lib")
 
 include_directories(include)
