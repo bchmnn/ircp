@@ -29,6 +29,12 @@ void free_message(message_t* message) {
 	free(message);
 }
 
+void free_serial_message(serial_message_t* message) {
+	if (!message) return;
+ 	free_message(message->msg);
+	free(message);
+}
+
 void free_mstring(mstring_t* mstring) {
 	if (!mstring) return;
 	if (mstring->str) free(mstring->str);
@@ -97,6 +103,38 @@ message_t* parse_message(u_int32_t len, char* str) {
 	return msg;
 
 }
+serial_message_t* parse_serial_message(u_int32_t len, u_int32_t serial, char* str){
+	char* smessge_str = malloc(sizeof (char)* (len + 4) );
+	*((u_int32_t*) smessge_str) = serial;
+	memcpy((smessge_str+4),body,len);
+	serial_message_t* smsg = parse_message_to_serial_message( parse_message( len +4 , smessge_str));
+	free(smessge_str);
+	return smsg; 
+}
+serial_message_t* parse_message_to_serial_message(message_t* msg ){
+	if(!msg || !msg->msg) return NULL;
+	if (msg->msg_len< 4){ 
+		LWARN("parse_serial_message requires at least 4 bytes\n");
+		return NULL;
+	}
+	serial_message_t* smsg = malloc(sizeof(serial_message_t));
+
+	smsg->serial = *((u_int32_t*) msg->msg);
+	if(msg->msg_len > (4 )){
+		char* str 		= malloc(sizeof(char)* msg->msg_len - 4);
+		memcpy(str, (msg->msg + 4), msg->msg_len - 4);
+		free(msg->msg);
+		msg->msg 		= str;
+		msg->msg_len 	= msg->msg_len -4;
+	}else{
+		free(msg->msg);
+		msg->msg 		= NULL;
+		msg->msg_len 	= 0;
+	}
+	smsg->msg = msg;
+	return smsg;
+}
+
 
 mstring_t* message_str(message_type_t type, char* body, size_t len) {
 
@@ -127,6 +165,12 @@ mstring_t* message_str(message_type_t type, char* body, size_t len) {
 	return mstring;
 }
 
+mstring_t* serial_message_str(message_type_t type, u_int32_t serial, char* body, size_t len){
+	char* smessge_str = malloc(sizeof (char)* (len + 4) );
+	*((u_int32_t*) smessge_str) = serial;
+	memcpy((smessge_str+4),body,len);
+	return message_str(type,smessge_str,len+4);
+}
 
 int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 
@@ -180,8 +224,58 @@ int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args) {
 
 
 int32_t chat(session_t* session, bool(*abort)(void*), char*(read_buffer)(void*), void* func_args) {
+
+	u_int32_t serial_tx =0;
+
+ 	rb_t* serial_tx_buf = rb_init(SERIAL_TX_BUF_SIZE, serial_message_t, SINGLE_ELEMENT);
+ 	rb_t* serial_rx_buf = rb_init(SERIAL_RX_BUF_SIZE, serial_message_t, SINGLE_ELEMENT);
 	
 	mstring_t* pkt_tx = NULL;
+
+	while (!abort(func_args)){
+		char* str = read_buffer(func_args);
+		if(str){
+			LTRAC("[CHAT]CC1200: Starting trans \n");
+			size_t len = strlen(str);
+			pkt_tx = serial_message_str(CHAT,serial_tx,str,len);
+			cc1200_tx(pkt_tx->str, pkt_tx->len);
+			serial_message_t* smsg = parse_serial_message( pkt_tx->len, serial_tx, pkt_tx->str);
+			rb_push(serial_tx_buf,smsg,0);
+			serial_tx++;
+			
+			free_mstring(pkt_tx);
+			free(str);
+		}
+		LTRAC("[CHAT]CC1200: Starting recv\n");
+		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10); //100
+		LTRAC("[CHAT]CC1200: Stopped recv\n");
+		if (pkt_rx && pkt_rx->len > 0) {			
+			message_t* msg = parse_message(pkt_rx->len, pkt_rx->pkt);
+			if (!msg) {
+				LDEBG("Received invalid msg\n");
+				free_cc1200_pkt(pkt_rx);
+				continue;
+			}
+			if (msg->type == HANDSHAKE || msg->type == CIAO)  {
+				printf("Handshake\n");
+				LTRAC("Receiving CHAT Handshake or ciao\n");
+				update_rssi_avg(session, pkt_rx->rssi );
+				session->stage = CONNECT;
+				free_rb_deep(serial_tx_buf, (void(*)(void*)) &free_serial_message );
+				free_rb_deep(serial_rx_buf, (void(*)(void*)) &free_serial_message );
+				free_message(msg);
+				free_cc1200_pkt(pkt_rx);
+				return 0;
+
+			}
+		
+
+
+	}
+	
+
+
+
 
 	while (!abort(func_args)) {
 

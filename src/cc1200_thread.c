@@ -79,7 +79,7 @@ void *cc1200_thread(void* _args) {
 	
 	while (!get_term_signal(args))
 	{
-	printf("foobar\n");
+	
 	session_t* session = malloc(sizeof(session_t));
 	handshake(session,(bool(*)(void*)) &get_term_signal , _args);
 	print_session(session);

@@ -10,4 +10,9 @@
 
 #define RSSI_TOLERANCE 6
 
+//protokoll
+#define SERIAL_TX_BUF_SIZE 512
+#define SERIAL_RX_BUF_SIZE 512
+
+
 #endif //CONFIG_H

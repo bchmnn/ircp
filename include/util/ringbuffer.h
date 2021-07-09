@@ -82,7 +82,7 @@ rb_elems_t* rb_pop(rb_t* rb);
  * @param rb  rb_t pointer
  */
 void free_rb(rb_t* rb);
-
+void free_rb_deep(rb_t* rb, void(*free_elem)(void*) );
 /**
  * Frees all allocated memory of rb_elems_t.
  * @param rb_elems  rb_elems_t pointer

@@ -125,6 +125,15 @@ void free_rb(rb_t* rb) {
 	free(rb);
 }
 
+void free_rb_deep(rb_t* rb, void(*free_elem)(void*) ){
+	while (!rb_empty(rb) ){
+		free_elem(rb_pop(rb));
+	}
+	free_rb(rb);
+	
+}
+
+
 void free_rb_elems(rb_elems_t* rb_elems) {
 	free(rb_elems->elems);
 	free(rb_elems);
