@@ -23,8 +23,8 @@ cc1200_pkt_t* malloc_cc1200_pkt(u_int8_t len) {
 }
 
 void free_cc1200_pkt(cc1200_pkt_t* pkt) {
-	if(!pkt->pkt) free(pkt->pkt);
-	if(!pkt) free(pkt);
+	if(pkt->pkt) free(pkt->pkt);
+	if(pkt) free(pkt);
 }
 
 bool cc1200_wait_till_mode(int32_t mode, size_t timeout_ms) {

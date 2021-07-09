@@ -83,7 +83,7 @@ message_t* parse_message(u_int32_t len, char* str) {
 
 	message_t* msg = malloc(sizeof(message_t));
 	if (len > 5) {
-		msg->msg = malloc(sizeof(char) * (len - 5));
+		msg->msg = malloc(sizeof(char) * ((len - 5)+1));
 		memcpy(msg->msg, (str + 1), len - 5);
 		msg->msg[len - 5] ='\0';
 	} else {
@@ -235,23 +235,16 @@ int32_t chat(session_t* session, bool(*abort)(void*), char*(read_buffer)(void*),
 			}else if (msg->type == CHAT) {
 				LTRAC("Receiving CHAT \n");
 				if(msg->msg) { printf("%s\n",msg->msg); }
-				printf("1test\n");
 				update_rssi_avg(session, pkt_rx->rssi );
-				printf("2test\n");
 				pkt_tx = message_str(CHAT_ACK,(char*) &pkt_rx->rssi,1);
-				printf("3test\n");
 				cc1200_tx(pkt_tx->str, pkt_tx->len);
-				printf("4test\n");
 				free_mstring(pkt_tx);
-				printf("5test\n");	
+					
 			}
 
 			free_message(msg);
-			printf("test1\n");
 			free_cc1200_pkt(pkt_rx);
-			printf("test2\n");
 			cc1200_recover_err();
-			printf("test3\n");
 			
 			
 		}
