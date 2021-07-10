@@ -82,7 +82,7 @@ void *cc1200_thread(void* _args) {
 	while (!get_term_signal(args)) {
 		switch (session->stage) {
 		case CONNECT:
-			handshake(session,(bool(*)(void*)) &get_term_signal , _args);
+			handshake(session,(bool(*)(void*)) &get_term_signal, _args);
 			print_session(session);
 			break;
 		case CHATTING:

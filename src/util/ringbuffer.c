@@ -125,13 +125,6 @@ void free_rb(rb_t* rb) {
 	free(rb);
 }
 
-void free_rb_deep(rb_t* rb, void(*free_elem)(void*) ){
-	while (!rb_empty(rb) ){
-		free_elem(rb_pop(rb));
-	}
-	free_rb(rb);
-	
-}
 
 
 void free_rb_elems(rb_elems_t* rb_elems) {
@@ -155,4 +148,35 @@ char* rb_pop_str(rb_t* rb) {
 	char* str = (char*) rb_elems->elems;
 	free(rb_elems);
 	return str;
+}
+
+int rb_push_ptr(rb_t* rb, void* elem) {
+	if (rb->strategy != SINGLE_ELEMENT || rb->buf_type != sizeof(void*))
+		return 2;
+	return rb_push(rb, &elem, 0);
+}
+
+void* rb_peek_ptr(rb_t* rb) {
+	if (rb->strategy != SINGLE_ELEMENT || rb->buf_type != sizeof(void*) || rb_empty(rb))
+		return NULL;
+	return (void*) *((u_int32_t*) rb->head);
+}
+
+void* rb_pop_ptr(rb_t* rb) {
+	if (rb->strategy != SINGLE_ELEMENT || rb->buf_type != sizeof(void*))
+		return NULL;
+	rb_elems_t* rb_elems = rb_pop(rb);
+	if (!rb_elems)
+		return NULL;
+	
+	void* ptr = (void*) *((u_int32_t*) rb_elems->elems);
+	free(rb_elems->elems);
+	free(rb_elems);
+	return ptr;
+}
+
+void free_rb_deep_ptr(rb_t* rb, void(*free_elem)(void*)) {
+	while (!rb_empty(rb))
+		free_elem(rb_pop_ptr(rb));
+	free_rb(rb);
 }

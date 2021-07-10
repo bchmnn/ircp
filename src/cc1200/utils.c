@@ -1,5 +1,6 @@
 #include "cc1200/utils.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -8,7 +9,7 @@
 #include "cc1200/regs.h"
 #include "util/log.h"
 
-#define LOGGING_LEVEL DEBUG
+#define LOGGING_LEVEL INFO
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)

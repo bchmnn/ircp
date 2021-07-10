@@ -82,7 +82,7 @@ rb_elems_t* rb_pop(rb_t* rb);
  * @param rb  rb_t pointer
  */
 void free_rb(rb_t* rb);
-void free_rb_deep(rb_t* rb, void(*free_elem)(void*) );
+
 /**
  * Frees all allocated memory of rb_elems_t.
  * @param rb_elems  rb_elems_t pointer
@@ -112,5 +112,25 @@ int rb_push_str(rb_t* rb, char* str);
  * @return    char pointer, null on error
  */
 char* rb_pop_str(rb_t* rb);
+
+int rb_push_ptr(rb_t* rb, void* elem);
+
+/**
+ * Peeks into rb and returns the pointer.
+ * @param rb  rb_t pointer
+ * @return    elem pointer
+ */
+void* rb_peek_ptr(rb_t* rb);
+
+void* rb_pop_ptr(rb_t* rb);
+
+/**
+ * Frees all allocated memory of rb_t
+ * and its elements.
+ * @param rb         rb_t pointer
+ * @param free_elem  func pointer to function that
+ *                   frees element
+ */
+void free_rb_deep_ptr(rb_t* rb, void(*free_elem)(void*));
 
 #endif //RINGBUFFER_H
