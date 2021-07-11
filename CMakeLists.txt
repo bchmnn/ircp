@@ -14,7 +14,7 @@ set (CMAKE_EXE_LINKER_FLAGS "-Wl,-rpath=lib")
 
 include_directories(include)
 link_directories(lib)
-file(GLOB SOURCES "src/*.c" "src/*/*.c")
+file(GLOB SOURCES "src/*.c" "src/*/*.c" "src/*/*/*.c")
 
 add_executable(target ${SOURCES})
 

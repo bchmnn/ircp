@@ -1,8 +1,7 @@
-#ifndef PROT_H
-#define PROT_H
+#ifndef IRCP_UTILS_H
+#define IRCP_UTILS_H
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <time.h>
 
 typedef enum {
@@ -11,17 +10,6 @@ typedef enum {
 	INTERRUPTED,
 	RECONNECT
 } stages_t;
-
-typedef enum {
-	mutex_lock     = 0,
-	mutex_unlock   = 1,
-	p_exit         = 2,
-	term_signal    = 3,
-	tx_from_buffer = 4,
-	pthread_max    = 5
-} pthread_fun;
-
-typedef bool(*func_ptr)(void* args);
 
 typedef enum {
 	MASTER,
@@ -87,20 +75,20 @@ const char* client_mode_str(client_mode_t client_mode);
 
 void print_session(session_t* session);
 
-inline void update_rssi_avg(session_t* session, int8_t rssi ){
+inline void update_rssi_avg(session_t* session, int8_t rssi) {
 	int8_t rssi_avg = session->rssi_avg;
 	rssi_avg = (rssi_avg + rssi) / 2;
-	session->rssi_avg  = rssi_avg;
+	session->rssi_avg = rssi_avg;
 	session->num_pkt_recv++;
 }
 
-inline void reset_sesson(session_t* session){
+inline void reset_session(session_t* session) {
 	session->stage = CONNECT;
 	session->rssi_avg = 0;
-	session->num_pkt_recv=0;
-	session->num_pkt_send=0;
+	session->num_pkt_recv = 0;
+	session->num_pkt_send = 0;
 	session->rssi_seed = 0;
-	session->client_mode=0;
+	session->client_mode = 0;
 }
 
 /**
@@ -147,22 +135,4 @@ mstring_t* gen_serial_message_str(message_type_t type, u_int32_t serial, char* b
  */
 serial_mstring_t* mstr_to_serial_mstr(mstring_t* mstring);
 
-/*****************************************
- * ___  ____ ____ ___ ____ ____ ____ _    
- * |__] |__/ |  |  |  |  | |    |  | |    
- * |    |  \ |__|  |  |__| |___ |__| |___ 
- *
- *****************************************/
-
-/**
- * Tries to handshake (refere to protocol).
- * @param session     session_t pointer for current session
- * @param abort       function pointer to a abort function (abort if returns true)
- * @param abort_args  arguments passed to function
- * @return  > 0 on error
- */
-int32_t handshake(session_t* session, bool(*abort)(void*), void* abort_args);
-
-int32_t chat(session_t* session, bool(*abort)(void*), char*(buffer)(void*), void* func_args);
-
-#endif //PROT_H
+#endif //IRCP_UTILS_H

@@ -8,6 +8,7 @@
 #include "prog/prssi.h"
 #include "prog/chat.h"
 #include "util/log.h"
+#include "util/types.h"
 
 #define LOGGING_LEVEL TRACE
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -15,8 +16,6 @@
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
-
-#define BUF_SIZE 2048
 
 // https://stackoverflow.com/a/37631288/14661040
 volatile sig_atomic_t sigint_received = 0;
@@ -79,12 +78,12 @@ int main (int argc, char **argv) {
 			case 0:
 			case 'c' :
 				LINFO("Executing chat program\n");
-				pchat((bool(*)(void*)) &get_sigint_received, NULL);
+				pchat((boolfunc_t) &get_sigint_received, NULL);
 				break;
 			case 'r':
 				LINFO("Executing rssi program\n");
 				prssi_mode_t mode = get_prssi_optarg(optarg);
-				prssi(mode, (bool(*)(void*)) &get_sigint_received, NULL);
+				prssi(mode, (boolfunc_t) &get_sigint_received, NULL);
 				break;
 			case 'i':
 				LERR("Not implemented\n");
@@ -94,7 +93,7 @@ int main (int argc, char **argv) {
 				break;
 			default:
 				LINFO("Executing chat program\n");
-				pchat((bool(*)(void*)) &get_sigint_received, NULL);
+				pchat((boolfunc_t) &get_sigint_received, NULL);
 				break;
 		}
 	}

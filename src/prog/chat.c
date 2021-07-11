@@ -9,11 +9,12 @@
 #include "cc1200/control.h"
 #include "cc1200/freq.h"
 #include "cc1200/utils.h"
+#include "ircp/ircp.h"
 #include "util/log.h"
 #include "util/ringbuffer.h"
 #include "util/readline.h"
+#include "util/types.h"
 #include "config.h"
-#include "cc1200_thread.h"
 
 #define LOGGING_LEVEL TRACE
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -22,7 +23,20 @@
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
-void pchat(bool(*abort)(void*), void* args) {
+static rb_t*           STDIN_BUFFER = NULL;
+static pthread_mutex_t STDIN_BUFFER_MUTEX;
+
+char* readln() {
+	char* str = NULL;
+	pthread_mutex_lock(&STDIN_BUFFER_MUTEX);
+	if (STDIN_BUFFER && !rb_empty(STDIN_BUFFER)) {
+		str = rb_pop_str(STDIN_BUFFER);
+	}
+	pthread_mutex_unlock(&STDIN_BUFFER_MUTEX);
+	return str;
+}
+
+void pchat(boolfunc_t abort, void* args) {
 
 	if (spi_init()) {
 		LERR("Initialization failed\n");
@@ -44,18 +58,15 @@ void pchat(bool(*abort)(void*), void* args) {
 	}
 
 	// initialize thread
-	rb_t* buf = rb_init(STDIN_BUF_SIZE, char, NULL_TERMINATED);
-	static pthread_mutex_t buf_mutex;
-	static bool term_signal = false;
-	static pthread_mutex_t term_signal_mutex;
+	STDIN_BUFFER = rb_init(STDIN_BUF_SIZE, char, NULL_TERMINATED);
 
-	cc1200_thread_args_t thread_args = {
-		buf,          &buf_mutex,
-		&term_signal, &term_signal_mutex
+	ircp_exec_args_t ircp_args = {
+		abort, args,
+		&readln, NULL
 	};
 
 	pthread_t thread;
-	pthread_create(&thread, NULL, cc1200_thread, (void*) &thread_args);
+	pthread_create(&thread, NULL, (threadfunc_t) &ircp_exec, (void*) &ircp_args);
 
 	// main program
 	while (!abort(args)) {
@@ -67,18 +78,17 @@ void pchat(bool(*abort)(void*), void* args) {
 			break;
 		}
 
-		pthread_mutex_lock(&buf_mutex);
-		rb_push_str(buf, line);
-		pthread_mutex_unlock(&buf_mutex);
+		pthread_mutex_lock(&STDIN_BUFFER_MUTEX);
+		rb_push_str(STDIN_BUFFER, line);
+		pthread_mutex_unlock(&STDIN_BUFFER_MUTEX);
 
 		free(line);
 
 	}
 
-	set_term_signal(&thread_args);
 	LDEBG("Waiting for thread to terminate\n");
 	pthread_join(thread, 0);
-	rb_free(buf);
+	rb_free(STDIN_BUFFER);
 	cc1200_cmd(SIDLE);
 	spi_shutdown();
 }

@@ -10,6 +10,7 @@
 #include "cc1200/freq.h"
 #include "cc1200/utils.h"
 #include "util/log.h"
+#include "util/types.h"
 
 #define LOGGING_LEVEL TRACE
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -18,7 +19,7 @@
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
-void prssi(prssi_mode_t mode, bool(*abort)(void*), void* args) {
+void prssi(prssi_mode_t mode, boolfunc_t abort, void* args) {
 
 	if (abort == NULL) {
 		LWARN("Parameter abort is NULL, program won't terminate\n");
@@ -54,9 +55,8 @@ void prssi(prssi_mode_t mode, bool(*abort)(void*), void* args) {
 	case PRSSI_TX:
 		cc1200_cmd(STX);
 		sleep(1);
-		while (!abort || !abort(args)) {
-			// continue
-		}
+		while (!abort || !abort(args))
+			continue;
 		break;
 	default:
 		LERR("Invalid mode\n");
