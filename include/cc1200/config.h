@@ -6,7 +6,7 @@
 #define CC1200_NUM_REGS 177
 
 // RX Config
-cc1200_reg_t CC1200_BASE_CONFIG[CC1200_NUM_REGS] = {
+static const cc1200_reg_t CC1200_BASE_CONFIG[CC1200_NUM_REGS] = {
     { IOCFG3          , 0x06 }, // GPIO3 IO Pin Configuration
     { IOCFG2          , 0x06 }, // GPIO2 IO Pin Configuration
     { IOCFG1          , 0x30 }, // GPIO1 IO Pin Configuration
@@ -186,7 +186,7 @@ cc1200_reg_t CC1200_BASE_CONFIG[CC1200_NUM_REGS] = {
     { RXFIFO_PRE_BUF  , 0x00 }  // RX FIFO Status
 };
 
-cc1200_reg_t CC1200_BASE_CONFIG_RSSI[CC1200_NUM_REGS] = {
+static const cc1200_reg_t CC1200_BASE_CONFIG_RSSI[CC1200_NUM_REGS] = {
     { IOCFG3          , 0x06 }, // GPIO3 IO Pin Configuration
     { IOCFG2          , 0x08 }, // GPIO2 IO Pin Configuration
     { IOCFG1          , 0x30 }, // GPIO1 IO Pin Configuration

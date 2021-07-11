@@ -10,7 +10,8 @@
 
 #define RSSI_TOLERANCE 6
 
-//protokoll
+// Program chat
+#define STDIN_BUF_SIZE 2048
 #define SERIAL_TX_BUF_SIZE 512
 #define SERIAL_RX_BUF_SIZE 512
 

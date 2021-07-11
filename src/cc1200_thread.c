@@ -53,7 +53,7 @@ bool get_pthread_exit(){
 	return 0;
 }
 
-char* read_from_ringbuffer(void* _args){
+char* read_from_ringbuffer(void* _args) {
 	char* str = NULL;
 	cc1200_thread_args_t* args = (cc1200_thread_args_t*) _args;
 	pthread_mutex_lock(args->term_signal_mutex);
@@ -64,14 +64,6 @@ char* read_from_ringbuffer(void* _args){
 	pthread_mutex_unlock(args->term_signal_mutex);
 	return str;
 }
-
-func_ptr pthread [pthread_max]={
-	get_pthread_mutex_lock ,
-	get_pthread_mutex_unlock,
-	get_pthread_exit,
-	get_term_signal,
-	//read_from_ringbuffer
-};
 
 void *cc1200_thread(void* _args) {
 	LDEBG("Starting cc1200_thread\n");

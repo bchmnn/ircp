@@ -22,7 +22,7 @@ static inline const char* cc1200_get_status_str_snop() {
  * @param regs  array of addr:val
  * @param len   length of this array
  */
-static inline void cc1200_regs_write(cc1200_reg_t* regs, size_t len) {
+static inline void cc1200_regs_write(const cc1200_reg_t* regs, size_t len) {
 	for (size_t i = 0; i < len; i++)
 		cc1200_reg_write(regs[i].adr, regs[i].val);
 }
