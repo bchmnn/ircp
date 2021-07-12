@@ -15,31 +15,43 @@
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
 int32_t handshake(session_t* session, boolfunc_t abort, void* abort_args) {
+
 	reset_session(session);
 	srandom(time(NULL));
 
 	mstring_t* pkt_tx = NULL;
 
 	while (!abort(abort_args)) {
+
 		LTRAC("Sending HANDSHAKE\n");
 		pkt_tx = gen_message_str(HANDSHAKE, NULL, 0);
 		cc1200_tx(pkt_tx->str, pkt_tx->len);
 		free_mstring(pkt_tx);
 
 		LTRAC("Receiving HANDSHAKE response\n");
-		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10);
+		int8_t rssi = RSSI_INVALID;
+		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10, &rssi);
+
+		if (!pkt_rx && rssi != RSSI_INVALID)
+			update_rssi_idle(session, rssi);
+
 		if (pkt_rx && pkt_rx->len > 0) {
 			message_t* msg = parse_message(pkt_rx->len, pkt_rx->pkt);
 			if (!msg) {
 				LDEBG("Received invalid msg\n");
 				free_cc1200_pkt(pkt_rx);
 				continue;
-			} else if (msg->type == HANDSHAKE_ACK && msg->msg_len == 1) {
+			}
+
+			update_rssi_high(session, pkt_rx->rssi);
+
+			if (msg->type == HANDSHAKE_ACK && msg->msg_len == 1) {
 				LDEBG("Received HANDSHAKE_ACK\n");
 				LDEBG("Meassured RSSI was: %d\n", (int32_t) pkt_rx->rssi);
 				// TODO compare msg rssi with meassured rssi
 				session->rssi_seed = (int8_t) *msg->msg;
 				session->client_mode = MASTER;
+				session->stage = CHATTING;
 			} else if (msg->type == HANDSHAKE) {
 				LDEBG("Received HANDSHAKE\n");
 				pkt_tx = gen_message_str(
@@ -51,14 +63,19 @@ int32_t handshake(session_t* session, boolfunc_t abort, void* abort_args) {
 				free_mstring(pkt_tx);
 				session->rssi_seed = pkt_rx->rssi;
 				session->client_mode = SERVANT;
+				session->stage = CHATTING;
 			}
 			free_message(msg);
 			free_cc1200_pkt(pkt_rx);
-			session->stage = CHATTING;
-			return 0;
+			
+			if (session->stage == CHATTING) return 0;
 		}
+
 		if (pkt_rx)
 			free_cc1200_pkt(pkt_rx);
+
 	}
+
 	return 1;
+
 }

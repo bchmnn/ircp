@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
+#include "cc1200/utils.h"
 #include "util/crypto.h"
 #include "util/log.h"
 
@@ -60,7 +62,12 @@ void print_session(session_t* session) {
 	printf("session: {\n");
 	printf("    stage: %s\n", stages_str(session->stage));
 	printf("    client_mode: %s\n", client_mode_str(session->client_mode));
+	printf("    num_pkt_recv: %u\n", session->num_pkt_recv);
+	printf("    num_pkt_send: %u\n", session->num_pkt_send);
+	printf("    rssi_idle: %d\n", (int32_t) session->rssi_idle);
+	printf("    rssi_high: %d\n", (int32_t) session->rssi_high);
 	printf("    rssi_seed: %d\n", (int32_t) session->rssi_seed);
+	printf("    curr_freq: %d\n", session->curr_freq);
 	printf("}\n");
 }
 
@@ -187,3 +194,16 @@ serial_mstring_t* mstr_to_serial_mstr(mstring_t* mstring) {
 
 }
 
+u_int8_t calc_interference_score(session_t* session, int8_t _rssi) {
+	if (_rssi == RSSI_INVALID)
+		return 0;
+	int32_t rssi = (int32_t) _rssi;
+	int32_t idle = (int32_t) session->rssi_idle;
+	int32_t high = (int32_t) session->rssi_high;
+	if (idle == RSSI_INVALID) idle = high;
+	if (high == RSSI_INVALID) high = idle;
+	if (idle == RSSI_INVALID) return 0;
+	u_int8_t d_idle = (u_int8_t) abs(rssi - idle);
+	u_int8_t d_high = (u_int8_t) abs(rssi - high);
+	return d_idle < d_high ? d_idle : d_high;
+}

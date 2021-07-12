@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define CRC16 2
+#define RSSI_INVALID -128
 
 typedef struct {
 	u_int8_t len;
@@ -44,7 +45,18 @@ bool cc1200_wait_till_mode(int32_t mode, size_t timeout_ms);
 bool cc1200_wait_till_bytes_in_fifo(size_t timeout_ms);
 
 void cc1200_tx(char* packet, int len);
-cc1200_pkt_t* cc1200_rx(size_t timeout);
+
+/**
+ * @brief Receive a packet with the CC1200
+ * Receive a packet with timeout. Also RSSI
+ * is meassured.
+ * @param timeout  wait for timeout*10 us (default: 100*10 us)
+ * @param rssi     a int8_t pointer whose value is set to
+ *                 meassured rssi
+ * @return         cc1200_pkt_t pointer on success, NULL on err
+ */
+cc1200_pkt_t* cc1200_rx(size_t timeout, int8_t* rssi);
+
 void cc1200_recover_err();
 
 #endif //CC1200_UTILS_H

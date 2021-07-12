@@ -57,23 +57,34 @@ bool cc1200_wait_till_bytes_in_fifo(size_t timeout_ms) {
 	return false;
 }
 
-cc1200_pkt_t* cc1200_rx(size_t timeout) {
+cc1200_pkt_t* cc1200_rx(size_t timeout, int8_t* rssi) {
 	// struct timeval start, stop;
 	cc1200_pkt_t*  pkt = NULL;
 	int            cnt = 0;
 	int            wait = timeout ? timeout : 100;
+	int32_t        rssi_total = 0;
 
 	cc1200_cmd(SRX);
 	cc1200_wait_till_mode(RX, 1000);
 
 	while (wait) {
 		LTRAC("Waiting for pkt\n");
-		if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
+		if (!(cc1200_reg_read(RSSI0, 0) & 1)) {
 			usleep(10);
 			wait--;
 			continue;
 		}
 
+		rssi_total = (int32_t) (int8_t) cc1200_reg_read(RSSI1, 0);
+		if (!cc1200_reg_read(NUM_RXBYTES, 0)) {
+			rssi_total = (rssi_total + (int32_t) (int8_t) cc1200_reg_read(RSSI1, 0)) >> 1;
+			usleep(10);
+			wait--;
+			continue;
+		}
+
+		// invalidate rssi. use crc16 rssi
+		rssi_total = -128;
 		int pkt_len = cc1200_reg_read(RXFIFO, 0);
 		LDEBG("Receiving pkt with len: %d\n", pkt_len);
 
@@ -115,6 +126,8 @@ cc1200_pkt_t* cc1200_rx(size_t timeout) {
 			*(((char*) &pkt->rssi)+i) = c;
 		}
 
+		rssi_total = pkt->rssi;
+
 		LDEBG("Received pkt: CRC16: { rssi: %d, link_quality: %d, crc_status: %s }\n",
 			pkt->rssi,
 			pkt->link_quality,
@@ -123,6 +136,9 @@ cc1200_pkt_t* cc1200_rx(size_t timeout) {
 
 		break;
 	}
+
+	if (rssi)
+		*rssi = (int8_t) rssi_total;
 
 	return pkt;
 }

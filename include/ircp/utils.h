@@ -21,9 +21,10 @@ typedef struct {
 	client_mode_t  client_mode;
 	size_t         num_pkt_recv;
 	size_t         num_pkt_send;
-	int8_t         rssi_avg;
+	int8_t         rssi_idle;
+	int8_t         rssi_high;
 	int8_t         rssi_seed;
-	float          curr_freq;
+	u_int32_t      curr_freq;
 	time_t         t_start;
 } session_t;
 
@@ -75,16 +76,31 @@ const char* client_mode_str(client_mode_t client_mode);
 
 void print_session(session_t* session);
 
-inline void update_rssi_avg(session_t* session, int8_t rssi) {
-	int8_t rssi_avg = session->rssi_avg;
-	rssi_avg = (rssi_avg + rssi) / 2;
-	session->rssi_avg = rssi_avg;
+inline void update_rssi_idle(session_t* session, int8_t rssi) {
+	if (session->rssi_idle == -128) {
+		session->rssi_idle = rssi;
+	} else {
+		int32_t rssi_avg = (int32_t) session->rssi_idle;
+		rssi_avg = (rssi_avg + (int32_t) rssi) >> 1;
+		session->rssi_idle = (int8_t) rssi_avg;
+	}
+}
+
+inline void update_rssi_high(session_t* session, int8_t rssi) {
+	if (session->rssi_high == -128) {
+		session->rssi_high = rssi;
+	} else {
+		int32_t rssi_avg = (int32_t) session->rssi_high;
+		rssi_avg = (rssi_avg + (int32_t) rssi) >> 1;
+		session->rssi_high = (int8_t) rssi_avg;
+	}
 	session->num_pkt_recv++;
 }
 
 inline void reset_session(session_t* session) {
 	session->stage = CONNECT;
-	session->rssi_avg = 0;
+	session->rssi_idle = -128;
+	session->rssi_high = -128;
 	session->num_pkt_recv = 0;
 	session->num_pkt_send = 0;
 	session->rssi_seed = 0;
@@ -134,5 +150,7 @@ mstring_t* gen_serial_message_str(message_type_t type, u_int32_t serial, char* b
  * @return         serial_mstring_t* on success, NULL on err
  */
 serial_mstring_t* mstr_to_serial_mstr(mstring_t* mstring);
+
+u_int8_t calc_interference_score(session_t* session, int8_t _rssi);
 
 #endif //IRCP_UTILS_H
