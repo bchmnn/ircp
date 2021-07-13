@@ -22,13 +22,13 @@
 void ircp_exec(ircp_exec_args_t* args) {
 
 	LDEBG("Executing IRCP\n");
-	static session_t session = { .stage = CONNECT, .curr_freq = 915000 };
+	static session_t session = { .stage = CONNECT, .curr_freq = 915100 };
 	
 	while (!args->abort(args->abort_args)) {
 		switch (session.stage) {
 		case CONNECT:
 			handshake(&session, args->abort, args->abort_args);
-			print_session(&session);
+			// print_session(&session);
 			break;
 		case CHATTING:
 			chat(

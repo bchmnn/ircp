@@ -37,7 +37,7 @@ void prssi(prssi_mode_t mode, boolfunc_t abort, void* args) {
 	}
 
 	cc1200_regs_write(CC1200_BASE_CONFIG_RSSI, CC1200_NUM_REGS);
-	if (cc1200_set_freq(915100)) {
+	if (cc1200_set_freq(915000)) {
 		LERR("Could not set frequency\n");
 		return;
 	}

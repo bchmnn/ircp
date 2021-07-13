@@ -8,7 +8,7 @@
 #define FREQ_MIN 820
 #define FREQ_MAX 950
 
-#define RSSI_TOLERANCE 6
+#define RSSI_TOLERANCE 10
 
 // Program chat
 #define STDIN_BUF_SIZE 2048

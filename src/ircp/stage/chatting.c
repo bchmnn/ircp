@@ -167,10 +167,7 @@ int32_t chat(
 		u_int8_t interference_score = calc_interference_score(session, rssi);
 		if (rssi != RSSI_INVALID && interference_score > RSSI_TOLERANCE) {
 			LWARN("Interference likely, RSSI: %d, Interference Score: %u\n", (int32_t) rssi, (u_int32_t) interference_score);
-			print_session(session);
-		}
-
-		if (!pkt_rx && rssi != RSSI_INVALID)
+		} else if (!pkt_rx && rssi != RSSI_INVALID)
 			update_rssi_idle(session, rssi);
 
 		if (pkt_rx && pkt_rx->len > 0) {
