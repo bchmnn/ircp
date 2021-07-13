@@ -12,7 +12,7 @@
 #include "util/ringbuffer.h"
 #include "config.h"
 
-#define LOGGING_LEVEL INFO
+#define LOGGING_LEVEL TRACE
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -30,18 +30,27 @@ void resend_from_buf() {
 	cc1200_tx(smstr->mstr->str, smstr->mstr->len);
 }
 
-void send_from_stdin(strfunc_t readln, void* readln_args) {
-	char* str = readln(readln_args);
+void send_str(session_t* session, char* str) {
 	if (!str)
 		return;
 	LTRAC("Starting trans\n");
 	size_t len = strlen(str);
 	mstring_t* pkt_tx = gen_serial_message_str(CHAT, serial_tx, str, len);
 	cc1200_tx(pkt_tx->str, pkt_tx->len);
+	session->num_pkt_send++;
 	serial_mstring_t* smstr = mstr_to_serial_mstr(pkt_tx);
 	rb_push_ptr(SERIAL_TX_BUF, smstr);
 	serial_tx++;
 	free(str);
+}
+
+u_int32_t history_sum(u_int32_t* history, size_t size) {
+	if (!history)
+		return 0;
+	u_int32_t sum = 0;
+	for (size_t i = 0; i < size; i++)
+		sum += history[i];
+	return sum;
 }
 
 void handle_handshake(session_t* session) {
@@ -139,10 +148,12 @@ int32_t chat(
 		);
 	}
 
-	bool ret_received = false;
-	bool nak_received = false;
-	u_int32_t resend_timer = 0;
-	mstring_t* pkt_tx = NULL;
+	bool        ret_received = false;
+	bool        nak_received = false;
+	u_int32_t   resend_timer = 0;
+	mstring_t*  pkt_tx       = NULL;
+	u_int32_t   history[HISTORY_SIZE] = { 0 };
+	size_t      hist_curr    = 0;
 
 	while (!abort(abort_args)) {
 
@@ -151,12 +162,17 @@ int32_t chat(
 			nak_received = false;
 			resend_timer = RESEND_AFTER_ITERATIONS;
 		} else { // SEND MESSAGE
-			send_from_stdin(readln, readln_args);
+			char* str = readln(readln_args);
+			if (str && strncmp(str, ":p", 2) == 0) {
+				print_session(session);
+				free(str);
+			} else {
+				send_str(session, str);
+			}
 		}
 
 		resend_timer--;
 
-		LTRAC("Starting recv\n");
 		int8_t rssi = RSSI_INVALID;
 		cc1200_pkt_t* pkt_rx = cc1200_rx((random() % 100) + 10, &rssi);
 
@@ -165,10 +181,22 @@ int32_t chat(
 		}
 
 		u_int8_t interference_score = calc_interference_score(session, rssi);
+		hist_curr = (hist_curr + 1) % HISTORY_SIZE;
 		if (rssi != RSSI_INVALID && interference_score > RSSI_TOLERANCE) {
-			LWARN("Interference likely, RSSI: %d, Interference Score: %u\n", (int32_t) rssi, (u_int32_t) interference_score);
-		} else if (!pkt_rx && rssi != RSSI_INVALID)
+			LTRAC("Interference RSSI: %u/%u\n", (u_int32_t) interference_score, RSSI_TOLERANCE);
+			history[hist_curr] = 1;
+			LTRAC("hist_sum: %u\n", history_sum(history, HISTORY_SIZE));
+			if (history_sum(history, HISTORY_SIZE) > INTERFERENCE) {
+				LINFO("Interference detected!\n");
+				if (pkt_rx)
+					free(pkt_rx);
+				session->stage = INTERRUPTED;
+				return 0;
+			}
+		} else if (!pkt_rx && rssi != RSSI_INVALID) {
+			history[hist_curr] = 0;
 			update_rssi_idle(session, rssi);
+		}
 
 		if (pkt_rx && pkt_rx->len > 0) {
 			message_t* msg = parse_message(pkt_rx->len, pkt_rx->pkt);
@@ -181,6 +209,7 @@ int32_t chat(
 
 			serial_message_t* smsg = msg_to_serial_msg(msg);
 			update_rssi_high(session, pkt_rx->rssi);
+			LTRAC("Received RSSI: %d\n", (int32_t) pkt_rx->rssi);
 
 			switch (msg->type) {
 				case HANDSHAKE:

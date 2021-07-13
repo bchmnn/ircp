@@ -22,7 +22,7 @@
 void ircp_exec(ircp_exec_args_t* args) {
 
 	LDEBG("Executing IRCP\n");
-	static session_t session = { .stage = CONNECT, .curr_freq = 915100 };
+	static session_t session = { .stage = CONNECT, .curr_freq = 915000 };
 	
 	while (!args->abort(args->abort_args)) {
 		switch (session.stage) {
@@ -40,7 +40,7 @@ void ircp_exec(ircp_exec_args_t* args) {
 			);
 			break;
 		case INTERRUPTED:
-			LERR("Not implemented\n");
+			handle_interrupt(&session);
 			break;
 		case RECONNECT:
 			LERR("Not implemented\n");

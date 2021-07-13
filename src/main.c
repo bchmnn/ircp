@@ -21,7 +21,7 @@
 volatile sig_atomic_t sigint_received = 0;
 
 void sigint_handler(int s) {
-	LINFO("Received SIGINT: %d\n", s);
+	printf("Received SIGINT: %d\n", s);
 	sigint_received = 1;
 }
 
@@ -47,6 +47,16 @@ prssi_mode_t get_prssi_optarg(char* optarg) {
 		return -1;
 }
 
+u_int32_t get_freq_optarg(char* optarg) {
+	u_int32_t freq = 0;
+	char c = *optarg;
+	while (c) {
+		freq = (freq*10) + (u_int32_t) (c - '0');
+		c = *++optarg;
+	}
+	return freq;
+}
+
 int main (int argc, char **argv) {
 
 	// prepare sigint_handler
@@ -56,6 +66,7 @@ int main (int argc, char **argv) {
 
 	static struct option long_options[] = {
 		{"rssi",      required_argument, 0, 'r'},
+		{"freq",      required_argument, 0, 'f'},
 		{"interfere", no_argument,       0, 'i'},
 		{"chat",      no_argument,       0, 'c'},
 		{"help",      no_argument,       0, 'h'},
@@ -63,12 +74,16 @@ int main (int argc, char **argv) {
 	};
 
 	int c;
+	bool exec_pchat         = true;
+	prssi_mode_t prssi_mode = 0;
+	bool exec_prssi         = false;
+	u_int32_t freq          = 0;
 
 	while (true) {
 
 		/* getopt_long stores the option index here. */
 		int option_index = 0;
-		c = getopt_long(argc, argv, "r:ich", long_options, &option_index);
+		c = getopt_long(argc, argv, "r:f:ich", long_options, &option_index);
 
 		/* Detect the end of the options. */
 		if (c == -1)
@@ -77,25 +92,33 @@ int main (int argc, char **argv) {
 		switch (c) {
 			case 0:
 			case 'c' :
-				LINFO("Executing chat program\n");
-				pchat((boolfunc_t) &get_sigint_received, NULL);
+				exec_pchat = true;
+				exec_prssi = false;
 				break;
 			case 'r':
-				LINFO("Executing rssi program\n");
-				prssi_mode_t mode = get_prssi_optarg(optarg);
-				prssi(mode, (boolfunc_t) &get_sigint_received, NULL);
+				exec_pchat = false;
+				exec_prssi = true;
+				prssi_mode = get_prssi_optarg(optarg);
+				break;
+			case 'f':
+				freq = get_freq_optarg(optarg);
 				break;
 			case 'i':
 				LERR("Not implemented\n");
 				break;
 			case 'h':
 				usage();
-				break;
+				return 0;
 			default:
-				LINFO("Executing chat program\n");
-				pchat((boolfunc_t) &get_sigint_received, NULL);
 				break;
 		}
+	}
+	if (exec_pchat) {
+		LINFO("Executing chat program\n");
+		pchat((boolfunc_t) &get_sigint_received, NULL);
+	} else if (exec_prssi) {
+		LINFO("Executing rssi program\n");
+		prssi(prssi_mode, freq, (boolfunc_t) &get_sigint_received, NULL);
 	}
 
 	return 0;

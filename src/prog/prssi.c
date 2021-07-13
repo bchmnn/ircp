@@ -1,5 +1,6 @@
 #include "prog/prssi.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -19,7 +20,7 @@
 #define LDEBG(fmt, ...) _LOG_DEBUG(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LTRAC(fmt, ...) _LOG_TRACE(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 
-void prssi(prssi_mode_t mode, boolfunc_t abort, void* args) {
+void prssi(prssi_mode_t mode, u_int32_t freq, boolfunc_t abort, void* args) {
 
 	if (abort == NULL) {
 		LWARN("Parameter abort is NULL, program won't terminate\n");
@@ -37,7 +38,9 @@ void prssi(prssi_mode_t mode, boolfunc_t abort, void* args) {
 	}
 
 	cc1200_regs_write(CC1200_BASE_CONFIG_RSSI, CC1200_NUM_REGS);
-	if (cc1200_set_freq(915000)) {
+	freq = freq == 0 ? 915000 : freq;
+	LINFO("Sending on frequency %u MHz\n", freq);
+	if (cc1200_set_freq(freq)) {
 		LERR("Could not set frequency\n");
 		return;
 	}
@@ -48,7 +51,7 @@ void prssi(prssi_mode_t mode, boolfunc_t abort, void* args) {
 		int8_t rssi = 0;
 		while (!abort || !abort(args)) {
 			rssi = (int8_t) cc1200_reg_read(RSSI1, 0);
-			LINFO("RSSI: %d\n", rssi);
+			printf("RSSI: %d\n", rssi);
 			sleep(1);
 		}
 		break;

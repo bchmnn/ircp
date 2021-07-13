@@ -9,7 +9,7 @@
 #include "util/crypto.h"
 #include "util/log.h"
 
-#define LOGGING_LEVEL INFO
+#define LOGGING_LEVEL DEBUG
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)

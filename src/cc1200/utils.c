@@ -9,7 +9,7 @@
 #include "cc1200/regs.h"
 #include "util/log.h"
 
-#define LOGGING_LEVEL INFO
+#define LOGGING_LEVEL WARNING
 #define LERR(fmt, ...) _LOG_ERROR(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LWARN(fmt, ...) _LOG_WARN(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
 #define LINFO(fmt, ...) _LOG_INFO(LOGGING_LEVEL, fmt, ##__VA_ARGS__)
@@ -92,7 +92,7 @@ cc1200_pkt_t* cc1200_rx(size_t timeout, int8_t* rssi) {
 		usleep(10 * pkt_len * 3);
 		while (cc1200_reg_read(NUM_RXBYTES, 0) < pkt_len) {
 			if (!wait) {
-				LWARN("Timeout for pkt\n");
+				LINFO("Timeout for pkt\n");
 				return NULL;
 			}
 			usleep(10 * pkt_len * 3);
@@ -113,7 +113,7 @@ cc1200_pkt_t* cc1200_rx(size_t timeout, int8_t* rssi) {
 		wait = 100;
 		while (cc1200_reg_read(NUM_RXBYTES, 0) < 2) {
 			if (!wait) {
-				LWARN("Timeout for CRC16\n");
+				LINFO("Timeout for CRC16\n");
 				free_cc1200_pkt(pkt);
 				return NULL;
 			}
