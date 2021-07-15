@@ -183,10 +183,19 @@ int32_t chat(
 		u_int8_t interference_score = calc_interference_score(session, rssi);
 		hist_curr = (hist_curr + 1) % HISTORY_SIZE;
 		if (rssi != RSSI_INVALID && interference_score > RSSI_TOLERANCE) {
-			LTRAC("Interference RSSI: %u/%u\n", (u_int32_t) interference_score, RSSI_TOLERANCE);
+			LTRAC("Interference: score: %u/%u. RSSI: %d, RSSI_IDLE: %d, RSSI_HIGH: %d\n"
+			      (u_int32_t) interference_score,
+			      (u_int32_t) RSSI_TOLERANCE,
+			      (int32_t) rssi,
+			      (int32_t) session->rssi_idle,
+			      (int32_t) session->rssi_high
+			);
 			history[hist_curr] = 1;
-			LTRAC("hist_sum: %u\n", history_sum(history, HISTORY_SIZE));
-			if (history_sum(history, HISTORY_SIZE) > INTERFERENCE) {
+			LTRAC("Interference: history sum: %u/%u\n",
+			      history_sum(history, HISTORY_SIZE),
+			      HISTORY_INTERFERENCE_TOLERANCE
+			);
+			if (history_sum(history, HISTORY_SIZE) > HISTORY_INTERFERENCE_TOLERANCE) {
 				LINFO("Interference detected!\n");
 				if (pkt_rx)
 					free(pkt_rx);
@@ -207,9 +216,9 @@ int32_t chat(
 				continue;
 			}
 
+			LTRAC("Received valid message: RSSI: %d\n", (int32_t) pkt_rx->rssi);
 			serial_message_t* smsg = msg_to_serial_msg(msg);
 			update_rssi_high(session, pkt_rx->rssi);
-			LTRAC("Received RSSI: %d\n", (int32_t) pkt_rx->rssi);
 
 			switch (msg->type) {
 				case HANDSHAKE:

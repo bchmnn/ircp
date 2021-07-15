@@ -38,7 +38,7 @@ void prssi(prssi_mode_t mode, u_int32_t freq, boolfunc_t abort, void* args) {
 	}
 
 	cc1200_regs_write(CC1200_BASE_CONFIG_RSSI, CC1200_NUM_REGS);
-	freq = freq == 0 ? 915000 : freq;
+	freq = freq == 0 ? DEFAULT_FREQUENCY : freq;
 	LINFO("Sending on frequency %u MHz\n", freq);
 	if (cc1200_set_freq(freq)) {
 		LERR("Could not set frequency\n");

@@ -197,13 +197,7 @@ serial_mstring_t* mstr_to_serial_mstr(mstring_t* mstring) {
 u_int8_t calc_interference_score(session_t* session, int8_t _rssi) {
 	if (_rssi == RSSI_INVALID)
 		return 0;
-	int32_t rssi = (int32_t) _rssi;
-	int32_t idle = (int32_t) session->rssi_idle;
-	int32_t high = (int32_t) session->rssi_high;
-	if (idle == RSSI_INVALID) idle = high;
-	if (high == RSSI_INVALID) high = idle;
-	if (idle == RSSI_INVALID) return 0;
-	u_int8_t d_idle = (u_int8_t) abs(rssi - idle);
-	u_int8_t d_high = (u_int8_t) abs(rssi - high);
-	return d_idle < d_high ? d_idle : d_high;
+	if (_rssi <= session->rssi_high)
+		return 0;
+	return (u_int8_t) abs((int32_t) (_rssi - session->rssi_high));
 }
