@@ -28,6 +28,7 @@ void ircp_exec(ircp_exec_args_t* args) {
 		switch (session.stage) {
 		case CONNECT:
 			handshake(&session, args->abort, args->abort_args);
+			// session.rssi_seed = -20;
 			// print_session(&session);
 			break;
 		case CHATTING:

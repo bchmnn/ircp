@@ -183,7 +183,7 @@ int32_t chat(
 		u_int8_t interference_score = calc_interference_score(session, rssi);
 		hist_curr = (hist_curr + 1) % HISTORY_SIZE;
 		if (rssi != RSSI_INVALID && interference_score > RSSI_TOLERANCE) {
-			LTRAC("Interference: score: %u/%u. RSSI: %d, RSSI_IDLE: %d, RSSI_HIGH: %d\n"
+			LTRAC("Interference: score: %u/%u. RSSI: %d, RSSI_IDLE: %d, RSSI_HIGH: %d\n",
 			      (u_int32_t) interference_score,
 			      (u_int32_t) RSSI_TOLERANCE,
 			      (int32_t) rssi,

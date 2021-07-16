@@ -43,6 +43,9 @@ void handle_interrupt(session_t* session) {
 	if (next_freq < FREQ_MIN)
 		next_freq = FREQ_MAX - ((FREQ_MIN - next_freq) % freq_delta);
 
+	// if (next_freq % 20 == 0)
+	// 	next_freq++;
+
 	next_freq *= 1000; // MHz -> KHz
 
 	if (cc1200_set_freq(next_freq)) {
